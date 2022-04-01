@@ -5,4 +5,5 @@ g# created by virtualenv automatically
 *.aux
 *.pyc
 *.synctex.gz
+*.pdf
 
