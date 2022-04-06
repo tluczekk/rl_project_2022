@@ -53,6 +53,8 @@
 \usepackage{graphicx}         % integration of images
 \usepackage{float}			% place pictures at specific place in text
 \usepackage{amsmath}	% mathematical equations
+\usepackage{xcolor} 	% colored font
+
 
 %%% END Article customizations
 
@@ -66,21 +68,18 @@
 \begin{document}
 \maketitle
 
-\section{Introduction}
-Whats our project about roughly.
+\section{Project Goal}
+The goal of our project is to optimize the parameterization of the implemented Reinforcement Learning algorithm. For that we will run experiments with different parameterization of update function and environment where an agent will act in an environment (both described below). The experiments will be visualized and this visualizations will be used to find the optimal parameters of the update function.
 
 \section{Environment}
-Lukas proposition: random quadratic map with moving enemies, agent wants to reach field on the map. If there is time we could implement som complications (fruits which broaden the view of the agent), wind. 
+Out environment represents a quadratic sea map where a pirate (the agent) wants to rob and destroy merchand ships. Each enemy ship will return a positive reward. If the agent robs all merchand ships, the game will be over. There are also enemy ships moving on the map which the agent has to avoid. If the agent is on the same field as an enemy ship the game will also be over with a negative reward for the agent.
 
-Possibilities: 
-Map with Holes (possibly moving --> foes), goal (final --> finite time horizon OR not final goals (i.e. fruits) --> agent wants to maximize collected fruits), dynamics (stochastic or deterministic), poss. wind (mooves player slightly in one direction, direction changes with time)
+The map size as well as the number of enemy and merchand ships shall be random (in some to be defined limits). Also the environment is stochastic in a sense that the agents actions (up, down, left, right) will only be executed with a certain probability p (i.e. 0.7). The other actions will be executed with a probability $frac{1-p}{n-1}$, where n is the number of actions. 
 
-Agent doesnt get the whole map, but sees only area around himself (possible complication, agent sees more if he eats a fruit)
-
-Reasons for choosing this environment.
+The agent does not see the whole map but only a certain area around himself (square). \todo{We did not discuss this. I would also be ok for me to see the whole map.}
 
 \section{Algorithm}
-Lukas opinion: model-free because world could change over time (i.e. if enemies move), if model free there seems to be q-learning (or sarsa) or policy gradient. The latter has the disadvantage that the update needs trajectories of state, action, reward tuples, but it converges faster. 
+
 
 
 \end{document}
