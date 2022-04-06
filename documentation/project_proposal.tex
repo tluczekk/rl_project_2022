@@ -70,6 +70,9 @@
 Whats our project about roughly.
 
 \section{Environment}
+Lukas proposition: random quadratic map with moving enemies, agent wants to reach field on the map. If there is time we could implement som complications (fruits which broaden the view of the agent), wind. 
+
+Possibilities: 
 Map with Holes (possibly moving --> foes), goal (final --> finite time horizon OR not final goals (i.e. fruits) --> agent wants to maximize collected fruits), dynamics (stochastic or deterministic), poss. wind (mooves player slightly in one direction, direction changes with time)
 
 Agent doesnt get the whole map, but sees only area around himself (possible complication, agent sees more if he eats a fruit)
@@ -77,7 +80,7 @@ Agent doesnt get the whole map, but sees only area around himself (possible comp
 Reasons for choosing this environment.
 
 \section{Algorithm}
-Algorithm choice, ...
+Lukas opinion: model-free because world could change over time (i.e. if enemies move), if model free there seems to be q-learning (or sarsa) or policy gradient. The latter has the disadvantage that the update needs trajectories of state, action, reward tuples, but it converges faster. 
 
 
 \end{document}

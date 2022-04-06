@@ -1,0 +1,13 @@
+Points to discuss (Lukas):
+- Definition of environment and algorithm
+- next steps
+	- Prepare Proposal (until friday)
+	- Discuss infrastructure:
+		-- git for versioning
+		-- tex for documentation
+		-- python as language
+	- Discuss class diagram for the project
+		-- minimal setup (agent, environment, experiment, main)
+			- agent: contains policy, parameterization of updatefunction possible (alpha, epsilon, ...)
+			- environment: contains map
+			- experiment: contains agent, environment
