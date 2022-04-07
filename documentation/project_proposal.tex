@@ -79,7 +79,7 @@ The map size as well as the number of enemy and merchand ships shall be random (
 The agent does not see the whole map but only a certain area around himself (square). \todo{We did not discuss this. I would also be ok for me to see the whole map.}
 
 \section{Algorithm}
-
+We want to use Soft Actor Critic (SAC) as Reinforcement Learning algorithm because of the following reasons: First SAC is a model-free algorithm which is well suited for an environment like ours which changes over time. Second, also because of the changing environment we want to use an online algorithm which allows us to update the policy every time step. Third SAC incorporates some new interesting ideas like the maximization of policy entropy to enable exploration.
 
 
 \end{document}
