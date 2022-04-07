@@ -74,7 +74,7 @@ The goal of our project is to optimize the parameterization of the implemented R
 \section{Environment}
 Out environment represents a quadratic sea map where a pirate (the agent) wants to rob and destroy merchand ships. Each enemy ship will return a positive reward. If the agent robs all merchand ships, the game will be over. There are also enemy ships moving on the map which the agent has to avoid. If the agent is on the same field as an enemy ship the game will also be over with a negative reward for the agent.
 
-The map size as well as the number of enemy and merchand ships shall be random (in some to be defined limits). Also the environment is stochastic in a sense that the agents actions (up, down, left, right) will only be executed with a certain probability p (i.e. 0.7). The other actions will be executed with a probability $frac{1-p}{n-1}$, where n is the number of actions. 
+The map size as well as the number of enemy and merchand ships shall be random (in some to be defined limits). Also the environment is stochastic in a sense that the agents actions (up, down, left, right) will only be executed with a certain probability p (i.e. 0.7). The other actions will be executed with a probability $\frac{1-p}{n-1}$, where n is the number of actions. 
 
 The agent does not see the whole map but only a certain area around himself (square). \todo{We did not discuss this. I would also be ok for me to see the whole map.}
 
