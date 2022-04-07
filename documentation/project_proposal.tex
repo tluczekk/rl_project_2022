@@ -72,14 +72,26 @@
 The goal of our project is to optimize the parameterization of the implemented Reinforcement Learning algorithm. For that we will run experiments with different parameterization of update function and environment where an agent will act in an environment (both described below). The experiments will be visualized and this visualizations will be used to find the optimal parameters of the update function.
 
 \section{Environment}
-Out environment represents a quadratic sea map where a pirate (the agent) wants to rob and destroy merchand ships. Each enemy ship will return a positive reward. If the agent robs all merchand ships, the game will be over. There are also enemy ships moving on the map which the agent has to avoid. If the agent is on the same field as an enemy ship the game will also be over with a negative reward for the agent.
+Our environment represents a quadratic sea map where a pirate (the agent) wants to rob and destroy merchant ships. Each merchant ship will return a positive reward. If the agent robs all merchant ships, the game will be over. It will also be over after fixed amount of moves. There are also enemy ships moving on the map which the agent has to avoid. If the agent is on the same field as an enemy ship the game will also be over with a negative reward for the agent.
 
-The map size as well as the number of enemy and merchand ships shall be random (in some to be defined limits). Also the environment is stochastic in a sense that the agents actions (up, down, left, right) will only be executed with a certain probability p (i.e. 0.7). The other actions will be executed with a probability $\frac{1-p}{n-1}$, where n is the number of actions. 
+The map size as well as the number of enemy and merchant ships shall be random (in some to be defined limits). Also the environment is stochastic in a sense that the agents actions (up, down, left, right) will only be executed with a certain probability p (i.e. 0.7). The other actions will be executed with a probability $\frac{1-p}{n-1}$, where n is the number of actions. The environment thus will be discrete, to meet the requirement.
 
 The agent does not see the whole map but only a certain area around himself (square). \todo{We did not discuss this. I would also be ok for me to see the whole map.}
 
 \section{Algorithm}
 We want to use Soft Actor Critic (SAC) as Reinforcement Learning algorithm because of the following reasons: First SAC is a model-free algorithm which is well suited for an environment like ours which changes over time. Second, also because of the changing environment we want to use an online algorithm which allows us to update the policy every time step. Third SAC incorporates some new interesting ideas like the maximization of policy entropy to enable exploration.
+\todo{I would change SAC to the algorithm I've sent yesterday. It's doable and it's able to produce better results in non-deterministic envs \\ Example of implementation could be this https://github.com/hemilpanchiwala/Hindsight-Experience-Replay}
+Given the non-deterministic nature of our environment, we would like to use Deep Q-Learning with Experience Replay. As shown in \cite{pilchau}, in non-deterministic, discrete environments it performs much better than baseline methods without using ER. Deep Q-Learning, as opossed to classical Q-Learning, uses neural network to optimize Q values.
+\todo{We might still use SAC as a baseline method}
 
+\begin{thebibliography}{2}
+\bibitem{pilchau}
+W. Pilar von Pilchau, A. Stein, J. Hohner, Bootstraping a DQN Replay Memory with Synthetic Experiences\\
+\texttt{https://arxiv.org/pdf/2002.01370.pdf}
+
+\bibitem{her}
+M. Andrychowicz et al, Hindsight Experience Replay\\
+\texttt{https://github.com/hemilpanchiwala/Hindsight-Experience-Replay}
+\end{thebibliography}
 
 \end{document}
