@@ -1,0 +1,49 @@
+@startuml
+allowmixing
+
+title Klassendiagramm:
+
+/' Define the class details'/
+
+/' ############################## Logic Package ########################'/
+
+    class Main{
+        +Experiment
+        +Config config
+    }
+
+    class Experiment{
+        +Environment env
+        +Agent agent
+        +Config config
+        +run_experiment()
+        +save_experiment_results()
+    }
+
+    class Environment {
+        +Config config
+        +int observation_space.n
+        +step(action)
+    }
+
+    class Agent {
+        +Config config
+        +generateAction(State current_state) -> float action
+        +update()
+    }
+
+
+/' ############################## Connections ########################'/
+
+Main -- Experiment
+
+/' Model'/
+
+Experiment *-r-  RunConfig
+Experiment *-l-  Agent
+Experiment *--  Environment
+
+RunConfig <-- ConfigFile
+
+
+@enduml
