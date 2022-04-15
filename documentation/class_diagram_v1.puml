@@ -39,11 +39,11 @@ Main -- Experiment
 
 /' Model'/
 
-Experiment *-r-  RunConfig
+Experiment *-r-  Config
 Experiment *-l-  Agent
 Experiment *--  Environment
 
-RunConfig <-- ConfigFile
+Config <-- ConfigFile
 
 
 @enduml

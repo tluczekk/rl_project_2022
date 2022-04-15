@@ -1,10 +1,10 @@
 from Config import Config
 import sys
 from experiment import Experiment
+import logging
 
-"""
-main runs the experiments
-"""
+# set logging
+logging.basicConfig(level=logging.INFO)
 
 def main(config_file_name):
     config = Config(config_file_name)

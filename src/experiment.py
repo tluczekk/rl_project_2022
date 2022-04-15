@@ -1,4 +1,5 @@
 from Config import Config
+from environment import Environment
 
 
 class Experiment:
@@ -9,7 +10,7 @@ class Experiment:
         """
         self.config = config
         # self.agent = Agent(params_from_config)
-        # self.environment = Environment(params_from_config)
+        self.environment = Environment(config)
 
 
     def runExperiment(self) -> None:
