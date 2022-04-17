@@ -37,7 +37,7 @@ class Config:
         self.env_nbr_merchants = 5
         self.env_size = 10
         self.env_nbr_enemies = 5
-        self.env_action_success_prop = 1
+        self.env_action_success_prob = 1
 
         # agent
         self.agent_discount_factor_gamma = 0.9
@@ -57,7 +57,7 @@ class Config:
         self.env_size = environment_section.getint('env_size')                                 # side length of square map
         self.env_nbr_enemies = environment_section.getint('env_nbr_enemies')
         self.env_nbr_merchants = environment_section.getint('env_nbr_merchants')
-        self.env_action_success_prop = environment_section.getfloat('env_action_success_prop')    # probability that action will succeed
+        self.env_action_success_prob = environment_section.getfloat('env_action_success_prob')    # probability that action will succeed
         self.env_random_map = environment_section.getboolean('env_random_map')                     # size, nbr of enemies and merchants is random
         self.env_random_enemies = environment_section.getboolean('env_random_enemies')            # only nbr of enemies is random
         self.env_random_merchants = environment_section.getboolean('env_random_merchants')         # only nbr of merchants is random        ## environment

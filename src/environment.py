@@ -64,8 +64,12 @@ class Environment:
         The function does this as follows:
         1. move pirate to new location (stay if new location would be outside of map)
         2.
-            2.1: move enemies (stay if merchant was there last step)
-            2.2: move merchants (stay if enemy is there in new step)
+            2.1: move enemies and handle collisions for every other step
+                2.1.1: move enemies (stay if merchant was there last step)
+                2.1.2: move merchants (stay if enemy is there in new step)
+            2.2: hanlde collisions for every other step
+                2.2.1: for merchants
+                2.2.2: for enemies
         3. return values
 
         :param:
@@ -80,10 +84,11 @@ class Environment:
         new_visibility_map = np.where(new_visibility_map > 0, 0, new_visibility_map)
 
         # 1. #############################################################################
-        ##### move pirates #####
+        ##### move pirate #####
         # get pirate action for random case
-        if np.random.uniform(0,1,1) > self.config.env_action_success_prop:
+        if np.random.uniform(0,1,1) > self.config.env_action_success_prob:
             action = np.random.randint(0,4)
+            logging.info(f'Random action: {action}\n')
 
         # get pirate position
         res = np.where(self._map == self._pirate_code)
@@ -92,10 +97,10 @@ class Environment:
         new_pirate_position = self.__get_new_position(action, old_pirate_position)
         # if new position not on map --> stay
         if new_visibility_map[new_pirate_position] == self._outside_map_code:
-            new_visibility_map[old_pirate_position] == self._pirate_code
+            new_visibility_map[old_pirate_position] = self._pirate_code
         # else move pirate to new position
         else:
-            new_visibility_map[new_pirate_position] == self._pirate_code
+            new_visibility_map[new_pirate_position] = self._pirate_code
 
         # initialize return values (in some cases, reward and done will be overriden below)
         reward = self._step_neg_reward
@@ -104,14 +109,15 @@ class Environment:
 
         # 2. #############################################################################
 
-        # move enemies and merchants only every other step
+        # 2.1 ## move enemies and merchants only every other step (and handle possible collisions of pirate or merchants)
         self._step_counter+=1
+        # move merchants and enemies every other step
         if self._step_counter%2 == 0:
 
             ############# move merchands and enemies #############
             action_values = list(map(lambda x: x.value, Action._member_map_.values()))
 
-            # 2.1 ############ move enemies first (merchants will stay if field is occupied by enemy) #############
+            # 2.1.1 ############ move enemies first (merchants will stay if field is occupied by enemy) #############
             res_enemies = np.asarray(np.where(self._map == self._enemy_code))
 
             for i in range(res_enemies.shape[1]):
@@ -127,12 +133,16 @@ class Environment:
                     return (new_state, reward, done, info)
                 # if enemy whants to go to a position where a merchant was in old step --> enemy stays
                 elif self._map[new_pirate_position] == self._merchant_code:
-                    new_visibility_map[tmp_old_enemy_position] == self._enemy_code
+                    new_visibility_map[tmp_old_enemy_position] = self._enemy_code
                 # else: place enemy on new_position
                 else:
-                    new_visibility_map[tmp_new_enemy_position] == self._enemy_code
+                    # don't move enemy if new position is outside map
+                    if new_visibility_map[tmp_new_enemy_position] == self._outside_map_code:
+                        new_visibility_map[tmp_old_enemy_position] = self._enemy_code
+                    else:
+                        new_visibility_map[tmp_new_enemy_position] = self._enemy_code
 
-            # 2.2 ########## move merchants ##############
+            # 2.1.2 ########## move merchants ##############
             res_merchants = np.asarray(np.where(self._map == self._merchant_code))
 
             for i in range(res_merchants.shape[1]):
@@ -145,11 +155,52 @@ class Environment:
                 if tmp_new_merchant_position == new_pirate_position:
                     reward = self._merchant_pos_reward
                 # if enemy is where merchant wants to go --> merchant stays
-                elif new_visibility_map[tmp_new_merchant_position] == self._enemy_code:
-                    new_visibility_map[tmp_old_merchant_position] == self._merchant_code
+                elif new_visibility_map[tmp_new_merchant_position] == self._merchant_code:
+                    new_visibility_map[tmp_old_merchant_position] = self._merchant_code
                 # else: place merchant on new_position
                 else:
-                    new_visibility_map[tmp_new_merchant_position] == self._merchant_code
+                    # don't move merchant if new position is outside map
+                    if new_visibility_map[tmp_new_merchant_position] == self._outside_map_code:
+                        new_visibility_map[tmp_old_merchant_position] = self._merchant_code
+                    else:
+                        new_visibility_map[tmp_new_merchant_position] = self._merchant_code
+
+        # 2.2 ## handle collisions for the case that the merchants and enemies did not move
+            # (we moved the pirate above but handled the eliminations for the merchant-enemy-move case before)
+        else:
+            # 2.2.1 ## handle merchant collisions
+
+            # get merchant positions
+            res_merchants = np.asarray(np.where(self._map == self._merchant_code))
+
+            for i in range(res_merchants.shape[1]):
+                # get merchant position
+                tmp_old_merchant_position = res_merchants[0,i], res_merchants[1,i]
+
+                # if collision: eliminate merchant if pirate is on same position as merchant
+                if tmp_old_merchant_position == new_pirate_position:
+                    reward = self._merchant_pos_reward
+                    # don't copy merchant position to new_visibility_map
+                # if no collision: place merchant on new_position
+                else:
+                    new_visibility_map[tmp_old_merchant_position] = self._merchant_code
+
+            # 2.2.2 ## handle enemy collisions
+            res_enemies = np.asarray(np.where(self._map == self._enemy_code))
+
+            for i in range(res_enemies.shape[1]):
+                # get merchant position
+                tmp_old_enemy_position = res_enemies[0,i], res_enemies[1,i]
+
+                # if collision: eliminate enemy if pirate is on same position as merchant
+                if tmp_old_enemy_position == new_pirate_position:
+                    new_state = 0
+                    reward = self._enemy_neg_reward
+                    done = True
+                    return (new_state, reward, done, info)
+                # if no collision: place enemy on new_position
+                else:
+                    new_visibility_map[tmp_old_enemy_position] = self._enemy_code
 
         # 3. #############################################################################
 
@@ -157,6 +208,11 @@ class Environment:
         self._map = new_visibility_map
         # get new state
         new_state = self.__get_state()
+
+        logging.info(f'Reward: {reward}\n'
+                     f'Action: {action}\n'
+                     f'Done: {done}\n'
+                     f'Map:\n {self._map}\n')
 
         return new_state, reward, done, info
 
@@ -171,11 +227,11 @@ class Environment:
         if action == Action.LEFT.value:
             new_position = (position[0], position[1]-1)
         elif action == Action.DOWN.value:
-            new_position = (position[0]-1, position[1])
+            new_position = (position[0]+1, position[1])
         elif action == Action.RIGHT.value:
             new_position = (position[0], position[1]+1)
         elif action == Action.UP.value:
-            new_position = (position[0]+1, position[1])
+            new_position = (position[0]-1, position[1])
         else:
             raise ValueError("Wrong action value. An action can only take the values 0, 1, 2, 3.")
 
@@ -218,7 +274,7 @@ class Environment:
         i_col_right = pirate_position[1]+self._visibility_of_pirate + 1
 
         vis_area_matrix = self._map[i_row_upper:i_row_lower, i_col_left:i_col_right]
-        logging.info(f'Visibility area (not flattened):\n {vis_area_matrix}\n')
+        # logging.info(f'Visibility area (not flattened):\n {vis_area_matrix}\n')
 
         # return flattened matrix
         return vis_area_matrix.flatten()
@@ -265,9 +321,9 @@ class Environment:
         upper = lenbig - self._visibility_of_pirate
         visibility_map[lower:upper, lower:upper] = map
 
-        logging.info(f'Map side length: {self.config.env_size}\n'
-                 f'Number of merchants : {self.config.env_nbr_merchants}\n'
-                 f'Number of enemies: {self.config.env_nbr_enemies}\n'
-                 f'Map:\n {visibility_map}\n')
+        # logging.info(f'Map side length: {self.config.env_size}\n'
+        #          f'Number of merchants : {self.config.env_nbr_merchants}\n'
+        #          f'Number of enemies: {self.config.env_nbr_enemies}\n'
+        #          f'Map:\n {visibility_map}\n')
 
         return visibility_map
