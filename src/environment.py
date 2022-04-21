@@ -23,6 +23,8 @@ class Environment:
         # 1       pirate ship
         # 2       merchant ship
         # 3       enemy ship
+        # -1      outside map
+        self._empty_sea_code = 0
         self._pirate_code = 1
         self._merchant_code = 2
         self._enemy_code = 3
@@ -49,41 +51,24 @@ class Environment:
 
     def step(self, action: int):
         """
-        This function moves pirate, merchants and enemies, and returns the new state, reward, done.
-        The pirate will be moved according to the action of the agent,
-        the other ships will be moved randomly but only every other step.
+        This function moves the pirate. If the flag "move_enemies_merchants" is set to TRUE then these ships are moved too.
+        Otherwise they stay at their initial place.
 
-        Rules for overlapping ships:
-        - merchants and enemies cannot be on the same field (if the random movement results in this the stay where they are)
-            -- if a pirate ship wants to go where a merchant was in the last step --> pirate stays
-            -- if a merchant ship wants to go where a pirate is in the new step --> merchant stays
-        - pirate and enemies or pirate and merchants can be on the same field
-            -- pirate and merchant --> merchant dissapears, pirate gets reward
-            -- pirate and enemy --> game over, negative reward
-
-        The function does this as follows:
-        1. move pirate to new location (stay if new location would be outside of map)
-        2.
-            2.1: move enemies and handle collisions for every other step
-                2.1.1: move enemies (stay if merchant was there last step)
-                2.1.2: move merchants (stay if enemy is there in new step)
-            2.2: hanlde collisions for every other step
-                2.2.1: for merchants
-                2.2.2: for enemies
-        3. return values
-
-        :param:
+        :return:
         new_state = what the agent sees in the new step (square area around himself)
         reward = reward for this action
         done = boolean, if game is over
         info = empty string, only to keep the same interface as openAI
         """
-        # we need 2 maps to dissolve cases, where 2 ships are on the same field
-        new_visibility_map = copy.deepcopy(self._map)
-        # set all fields on the map to 0
-        new_visibility_map = np.where(new_visibility_map > 0, 0, new_visibility_map)
-
         # 1. #############################################################################
+
+        # initialize return values:
+        new_state = 0
+        reward = 0
+        done = False
+        info = ""
+
+
         ##### move pirate #####
         # get pirate action for random case
         if np.random.uniform(0,1,1) > self.config.env_action_success_prob:
@@ -95,13 +80,68 @@ class Environment:
         old_pirate_position = int(res[0]), int(res[1])
         # get new position
         new_pirate_position = self.__get_new_position(action, old_pirate_position)
-        # if new position not on map --> stay
-        if new_visibility_map[new_pirate_position] == self._outside_map_code:
-            new_visibility_map[old_pirate_position] = self._pirate_code
-        # else move pirate to new position
-        else:
-            new_visibility_map[new_pirate_position] = self._pirate_code
 
+        # if new position not on map --> stay
+        if self._map[new_pirate_position] == self._outside_map_code:
+            new_pirate_position = old_pirate_position
+
+        ##### move other ships #####
+        if self.config.env_move_enemies_merchants:
+            self.__move_enemies_and_merchants()
+
+        ##### compute reward and place pirate to new position #####
+        if self._map[new_pirate_position] == self._enemy_code:
+            new_state = np.zeros(self.observation_space)
+            reward = self._enemy_neg_reward
+            done = True
+            info = ""
+            return (new_state, reward, done, info)
+        elif self._map[new_pirate_position] == self._merchant_code:
+            self._map[old_pirate_position] = self._empty_sea_code
+            self._map[new_pirate_position] = self._pirate_code
+            new_state = self.__get_state()
+            reward = self._merchant_pos_reward
+        else:
+            self._map[old_pirate_position] = self._empty_sea_code
+            self._map[new_pirate_position] = self._pirate_code
+            new_state = self.__get_state()
+            reward = self._step_neg_reward
+
+
+        logging.info(f'Reward: {reward}\n'
+                     f'Action: {action}\n'
+                     f'Done: {done}\n'
+                     f'Map:\n {self._map}\n')
+
+        return new_state, reward, done, info
+
+    def __move_enemies_and_merchants(self):
+        """
+        This function moves the enemy and merchant ships. It will only be activated if the flag (move_enemies_merchants)
+        is set to true in the config.
+        Otherwise the enemy and merchant ships stay where they are.
+
+
+        Rules for overlapping ships:
+        - merchants and enemies cannot be on the same field (if the random movement results in this the stay where they are)
+            -- if an enemy ship wants to go where a merchant was in the last step --> pirate stays
+            -- if a merchant ship wants to go where an enemy is in the new step --> merchant stays
+        - pirate and enemies or pirate and merchants can be on the same field
+            -- pirate and merchant --> merchant dissapears, pirate gets reward
+            -- pirate and enemy --> game over, negative reward
+
+        The function does this as follows:
+        1. move pirate to new location (stay if new location would be outside of map)
+        2.
+            2.1: move enemies and handle collisions for every other step
+                2.1.1: move enemies (stay if merchant was there last step)
+                2.1.2: move merchants (stay if enemy is there in new step)
+            2.2: handle collisions for every other step
+                2.2.1: for merchants
+                2.2.2: for enemies
+        3. return values
+        :return:
+        """
         # initialize return values (in some cases, reward and done will be overriden below)
         reward = self._step_neg_reward
         done = False
@@ -115,7 +155,6 @@ class Environment:
         if self._step_counter%2 == 0:
 
             ############# move merchands and enemies #############
-            action_values = list(map(lambda x: x.value, Action._member_map_.values()))
 
             # 2.1.1 ############ move enemies first (merchants will stay if field is occupied by enemy) #############
             res_enemies = np.asarray(np.where(self._map == self._enemy_code))
@@ -126,13 +165,18 @@ class Environment:
                 tmp_action = np.random.choice(list(Action)).value
                 tmp_new_enemy_position = self.__get_new_position(tmp_action, tmp_old_enemy_position)
 
+                # we have to delete the enemy_code on the old map for this enemy because below we have to check if
+                # on the new position there is an enemy (and we dont want to compare the same enemy)
+                self._map[old_pirate_position] = self._empty_sea_code
+
                 # end game if enemy and pirate are on same position
                 if tmp_new_enemy_position == new_pirate_position:
+                    new_state = np.zeros(self.observation_space)
                     reward = self._enemy_neg_reward
                     done = True
                     return (new_state, reward, done, info)
-                # if enemy whants to go to a position where a merchant was in old step --> enemy stays
-                elif self._map[new_pirate_position] == self._merchant_code:
+                # if enemy whants to go to a position where a merchant or other enemy was in old step --> enemy stays
+                elif self._map[new_pirate_position] == self._merchant_code or self._map[new_pirate_position] == self._enemy_code:
                     new_visibility_map[tmp_old_enemy_position] = self._enemy_code
                 # else: place enemy on new_position
                 else:
@@ -209,12 +253,6 @@ class Environment:
         # get new state
         new_state = self.__get_state()
 
-        logging.info(f'Reward: {reward}\n'
-                     f'Action: {action}\n'
-                     f'Done: {done}\n'
-                     f'Map:\n {self._map}\n')
-
-        return new_state, reward, done, info
 
     def __get_new_position(self, action, position):
         """
