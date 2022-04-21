@@ -19,8 +19,6 @@ class Experiment:
         """
         scores = []
         eps = eps_start
-        
-        agent = self.agent
 
         for episode in range(1, n_episodes+1):
             # TODO: resetting the environment
@@ -40,11 +38,6 @@ class Experiment:
             eps = max(eps_end, eps_decay*eps)
 
         return scores
-
-
-
-        
-
 
     def saveResults(self):
         """

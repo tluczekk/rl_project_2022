@@ -128,7 +128,7 @@ class Environment:
 
                 # end game if enemy and pirate are on same position
                 if tmp_new_enemy_position == new_pirate_position:
-                    new_state = 0
+                    new_state = np.zeros(25)
                     reward = self._enemy_neg_reward
                     done = True
                     return (new_state, reward, done, info)
@@ -195,7 +195,7 @@ class Environment:
 
                 # if collision: eliminate enemy if pirate is on same position as merchant
                 if tmp_old_enemy_position == new_pirate_position:
-                    new_state = 0
+                    new_state = np.zeros(25)
                     reward = self._enemy_neg_reward
                     done = True
                     return (new_state, reward, done, info)
@@ -274,10 +274,10 @@ class Environment:
         pirate_position = res[0].astype(int), res[1].astype(int)
 
         # get visible area
-        i_row_upper = (pirate_position[0]-self._visibility_of_pirate).astype(int)[0]
-        i_row_lower = (pirate_position[0]+self._visibility_of_pirate + 1).astype(int)[0]
-        i_col_left = (pirate_position[1]-self._visibility_of_pirate).astype(int)[0]
-        i_col_right = (pirate_position[1]+self._visibility_of_pirate + 1).astype(int)[0]
+        i_row_upper = (pirate_position[0]-self._visibility_of_pirate)[0]
+        i_row_lower = (pirate_position[0]+self._visibility_of_pirate + 1)[0]
+        i_col_left = (pirate_position[1]-self._visibility_of_pirate)[0]
+        i_col_right = (pirate_position[1]+self._visibility_of_pirate + 1)[0]
 
         tmp_map = np.array(self._map)
         vis_area_matrix = tmp_map[i_row_upper:i_row_lower, i_col_left:i_col_right]
