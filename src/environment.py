@@ -194,7 +194,7 @@ class Environment:
 
                 # if collision: eliminate enemy if pirate is on same position as merchant
                 if tmp_old_enemy_position == new_pirate_position:
-                    new_state = 0
+                    new_state = np.zeros(self.observation_space)
                     reward = self._enemy_neg_reward
                     done = True
                     return (new_state, reward, done, info)
@@ -327,3 +327,11 @@ class Environment:
         #          f'Map:\n {visibility_map}\n')
 
         return visibility_map
+
+    def reset_environment(self):
+        """This function resets the environment to an initial state. That means:
+        - create new map
+        - reset _step_counter to 0
+        """
+        self._step_counter = 0
+        self._map = self.__create_map()
