@@ -1,3 +1,6 @@
+"""
+Source: https://arxiv.org/pdf/1511.05952.pdf
+"""
 import numpy as np
 import random
 
@@ -24,20 +27,6 @@ UPDATE_MEM_PAR_EVERY = 3000
 EXPERIENCES_PER_SAMPLING = math.ceil(BATCH_SIZE * UPDATE_MEM_EVERY / UPDATE_NN_EVERY)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-class Agent_DQN():
-
-    def __init__(self, config: Config):
-        # Hyperparameters
-        self.config = config
-        
-
-
-
-    def update(self):
-        """
-
-        """
 
 class Agent:
     def __init__(self, state_size, action_size, seed, compute_weights = False) -> None:
@@ -84,7 +73,7 @@ class Agent:
         if random.random() > eps:
             return np.argmax(action_values.cpu().data.numpy())
         else:
-            return random.choice(np.arrange(self.action_size))
+            return random.choice(np.arange(self.action_size))
 
     def learn(self, sample, gamma):
         states, actions, rewards, next_states, dones, weights, indices = sample
@@ -109,3 +98,13 @@ class Agent:
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1.0 - tau)*target_param.data)
 
+
+class Agent_DQN(Agent):
+
+   def __init__(self, config: Config):
+        # Hyperparameters
+        self.config = config
+        # Getting parameters of environment
+        # Each field can be either merchant, enemy or empty, except field of agent
+        self._visibility_of_pirate = 2
+        super().__init__((self._visibility_of_pirate*2+1)**2, 4, 123)

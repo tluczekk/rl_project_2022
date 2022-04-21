@@ -10,7 +10,8 @@ def main(config_file_name):
     config = Config(config_file_name)
     # Experiment
     experiment = Experiment(config)
-    experiment.run_experiment()
+    scores = experiment.runExperiment()
+    print(scores)
 
 
 if __name__ == '__main__':

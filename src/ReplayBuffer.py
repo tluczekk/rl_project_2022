@@ -122,7 +122,7 @@ class ReplayBuffer:
         priority = self.priorities_max
         weight = self.weights_max
         self.priorities_sum_alpha += priority ** self.alpha
-        probability = priority ** self.alpha / self.update_priorities
+        probability = priority ** self.alpha / self.priorities_sum_alpha
         e = self.experience(state, action, reward, next_state, done)
         self.memory[index] = e
         d = self.data(priority, probability, weight, index)

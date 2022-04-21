@@ -128,6 +128,7 @@ class Environment:
 
                 # end game if enemy and pirate are on same position
                 if tmp_new_enemy_position == new_pirate_position:
+                    new_state = 0
                     reward = self._enemy_neg_reward
                     done = True
                     return (new_state, reward, done, info)
@@ -237,6 +238,11 @@ class Environment:
 
         return new_position
 
+    # For external use in training 
+    def get_state(self):
+        res = self.__get_state()
+        print(len(res))
+        return np.array(res)
 
     def __get_state(self):
         """
@@ -265,15 +271,16 @@ class Environment:
         """
         # get position of pirate
         res = np.where(self._map == self._pirate_code)
-        pirate_position = int(res[0]), int(res[1])
+        pirate_position = res[0].astype(int), res[1].astype(int)
 
         # get visible area
-        i_row_upper = pirate_position[0]-self._visibility_of_pirate
-        i_row_lower = pirate_position[0]+self._visibility_of_pirate + 1
-        i_col_left = pirate_position[1]-self._visibility_of_pirate
-        i_col_right = pirate_position[1]+self._visibility_of_pirate + 1
+        i_row_upper = (pirate_position[0]-self._visibility_of_pirate).astype(int)[0]
+        i_row_lower = (pirate_position[0]+self._visibility_of_pirate + 1).astype(int)[0]
+        i_col_left = (pirate_position[1]-self._visibility_of_pirate).astype(int)[0]
+        i_col_right = (pirate_position[1]+self._visibility_of_pirate + 1).astype(int)[0]
 
-        vis_area_matrix = self._map[i_row_upper:i_row_lower, i_col_left:i_col_right]
+        tmp_map = np.array(self._map)
+        vis_area_matrix = tmp_map[i_row_upper:i_row_lower, i_col_left:i_col_right]
         # logging.info(f'Visibility area (not flattened):\n {vis_area_matrix}\n')
 
         # return flattened matrix
