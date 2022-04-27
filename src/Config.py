@@ -3,6 +3,7 @@ import os
 import configparser
 import logging
 import random
+import math
 
 
 class Config:
@@ -74,6 +75,16 @@ class Config:
         agent_section = self.configuration['agent']
         self.agent_discount_factor_gamma = agent_section.getfloat('agent_discount_factor_gamma')
         self.agent_stepsize_alpha = agent_section.getfloat('agent_stepsize_alpha')
+        self.agent_buffer_size = agent_section.getint('agent_buffer_size')
+        self.agent_batch_size = agent_section.getint('agent_batch_size')
+        self.agent_gamma = agent_section.getfloat('agent_gamma')
+        self.agent_tau = agent_section.getfloat('agent_tau')
+        self.agent_learning_rate = agent_section.getfloat('agent_learning_rate')
+        self.agent_update_nn_every = agent_section.getint('agent_update_nn_every')
+        self.agent_update_mem_every = agent_section.getint('agent_update_mem_every')
+        self.agent_update_mem_par_every = agent_section.getint('agent_update_mem_par_every')
+        self.agent_experiences_per_sampling = math.ceil(self.agent_batch_size * self.agent_update_mem_every / self.agent_update_nn_every)
+
 
         # Experiment section
         experiment_section = self.configuration['experiment']
