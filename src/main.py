@@ -2,7 +2,7 @@ from Config import Config
 import sys
 from experiment import Experiment
 import logging
-
+from matplotlib import pyplot as plt
 # set logging
 logging.basicConfig(level=logging.INFO)
 
@@ -12,6 +12,8 @@ def main(config_file_name):
     experiment = Experiment(config)
     scores = experiment.runExperiment()
     print(scores)
+    plt.plot(scores)
+    plt.savefig("experiment_results.png")
 
 
 if __name__ == '__main__':
