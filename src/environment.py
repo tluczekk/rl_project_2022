@@ -39,8 +39,8 @@ class Environment:
         self._step_counter = 0          # this parameter is used to determine every other step (merchant and enemies move only every other step)
 
         ## params for external use
-        self.observation_space = (self._visibility_of_pirate*2+1)**2
-        self.action_space = len(Action)
+        self.observation_space_size = (self._visibility_of_pirate*2+1)**2
+        self.action_space_size = len(Action)
 
         # initialize map
         self._map = self.__create_map()
