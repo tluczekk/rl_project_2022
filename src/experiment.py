@@ -21,14 +21,13 @@ class Experiment:
         eps = eps_start
 
         for episode in range(1, n_episodes+1):
-            # TODO: resetting the environment
-            # state = env.reset()
-            env = Environment(self.config)
-            state = env.get_state()
+            state = self.environment.reset()
+            #env = Environment(self.config)
+            #state = self.environment.get_state()
             score = 0
             for t in range(max_t):
                 action = self.agent.act(state, eps)
-                next_state, reward, done, _ = env.step(action)
+                next_state, reward, done, _ = self.environment.step(action)
                 self.agent.step(state, action, reward, next_state, done)
                 state = next_state
                 score += reward

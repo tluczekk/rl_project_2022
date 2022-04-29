@@ -86,8 +86,8 @@ class Environment:
             new_pirate_position = old_pirate_position
 
         ##### move other ships #####
-        if self.config.env_move_enemies_merchants:
-            self._map = self.__get_tmp_map_with_moved_enemies_merchants()
+        #if self.config.env_move_enemies_merchants:
+        #    self._map = self.__get_tmp_map_with_moved_enemies_merchants()
 
         ##### compute reward and place pirate to new position #####
         # if pirate is on enemy position
@@ -281,6 +281,9 @@ class Environment:
         # return flattened matrix
         return vis_area_matrix.flatten()
 
+    def get_state(self):
+        return np.array(self.__get_state())
+
     def __create_map(self):
         """
         :param config:
@@ -330,10 +333,11 @@ class Environment:
 
         return visibility_map
 
-    def reset_environment(self):
+    def reset(self):
         """This function resets the environment to an initial state. That means:
         - create new map
         - reset _step_counter to 0
         """
         self._step_counter = 0
         self._map = self.__create_map()
+        return self.__get_state()
