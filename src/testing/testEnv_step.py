@@ -10,7 +10,8 @@ config = Config('config_1')
 env = Environment(config)
 
 ### check if players move correctly
-for i in range(100):
+for i in range(5):
+    print(i)
     new_state, reward, done, info =  env.step(Action.DOWN.value)
     if done:
         print(reward)
