@@ -91,6 +91,13 @@ class Config:
         self.exp_max_nbr_of_steps = experiment_section.getint('exp_max_nbr_of_steps')
         self.exp_nbr_game_per_exp = experiment_section.getint('exp_nbr_game_per_exp')
 
+        # Replay buffer section
+        buffer_section = self.configuration['buffer']
+        self.buf_alpha = buffer_section.getfloat('buf_alpha')
+        self.buf_alpha_decay = buffer_section.getfloat('buf_alpha_decay')
+        self.buf_beta = buffer_section.getfloat('buf_beta')
+        self.buf_beta_growth = buffer_section.getfloat('buf_beta_growth')
+
         # Persistence options
         # self.load_model_name = self.configuratio['load_model_name']   # enter name if you want to load an existing model
 

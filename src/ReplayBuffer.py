@@ -9,33 +9,38 @@ from numpy.random import choice
 import torch
 import operator
 
+from Config import Config
+
+# Speeding up PyTorch calculations if Nvidia's CUDA is available
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-ALPHA = 0.5
-ALPHA_DECAY = 0.99
-BETA = 0.5
-BETA_GROWTH = 1.001
-
 class ReplayBuffer:
-    def __init__(self, action_size, buffer_size, batch_size, experiences_per_sampling, seed, compute_weights) -> None:
+    def __init__(self, action_size, buffer_size, batch_size, experiences_per_sampling, seed, compute_weights, config: Config) -> None:
+        # Parameters passed by agent
         self.action_size = action_size
         self.buffer_size = buffer_size
         self.batch_size = batch_size
         self.experiences_per_sampling = experiences_per_sampling
 
-        self.alpha = ALPHA
-        self.alpha_decay_rate = ALPHA_DECAY
-        self.beta = BETA
-        self.beta_growth_rate = BETA_GROWTH
+        # Parameters specific to Replay Buffer
+        self.alpha = config.buf_alpha
+        self.alpha_decay_rate = config.buf_alpha_decay
+        self.beta = config.buf_beta
+        self.beta_growth_rate = config.buf_beta_growth
         self.seed = random.seed(seed)
         self.compute_weights = compute_weights
         self.experience_count = 0
 
+        # Dictionaries storing vital information about experience buffer
+        #
+        # Dicitionary storing details about each experience
         self.experience = namedtuple("Experience",
             field_names=["state", "action", "reward", "next_state", "done"])
+        # Dictionary storing data associated with experience, that is its priority, probability of being sampled and weight
         self.data = namedtuple("Data",
             field_names=["priority", "probability", "weight", "index"])
         
+        # Initializing buffer
         indices = []
         index_data = []
         for i in range(buffer_size):
@@ -43,6 +48,7 @@ class ReplayBuffer:
             d = self.data(0, 0, 0, i)
             index_data.append(d)
 
+        # Initializing utility variables 
         self.memory = {key: self.experience for key in indices}
         self.memory_data = {key: data for key, data in zip(indices, index_data)}
         self.sampled_batches = []

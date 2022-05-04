@@ -13,7 +13,7 @@ class Experiment:
         self.environment = Environment(config)
 
 
-    def runExperiment(self, n_episodes=200, max_t=2000, eps_start=1.0, eps_end=0.001, eps_decay=0.995) -> None:
+    def runExperiment(self, n_episodes=200, max_t=500, eps_start=1.0, eps_end=0.001, eps_decay=0.995) -> None:
         """
         This function runs the main algorithm
         """

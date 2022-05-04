@@ -33,9 +33,9 @@ class Environment:
         ## initialize parameters which are independant of config
         # set visibility of pirate (change this value only if absolutely necessary)
         self._visibility_of_pirate = 2       # how many fields (in each direction) does the pirate see (i.e. 2 means the pirate seesa square of 25 fields)
-        self._enemy_neg_reward = -100
-        self._step_neg_reward = -1
-        self._merchant_pos_reward = 100
+        self._enemy_neg_reward = -10
+        self._step_neg_reward = 0
+        self._merchant_pos_reward = 10
         self._step_counter = 0          # this parameter is used to determine every other step (merchant and enemies move only every other step)
 
         ## params for external use
@@ -67,7 +67,7 @@ class Environment:
         reward = 0
         done = False
         info = ""
-
+        
 
         ##### move pirate #####
         # get pirate action for random case
@@ -87,8 +87,8 @@ class Environment:
 
         ##### move other ships #####
         #if self.config.env_move_enemies_merchants:
-        #if True:
-        #    self._map = self.__get_tmp_map_with_moved_enemies_merchants()
+        if True:
+            self._map = self.__get_tmp_map_with_moved_enemies_merchants()
 
         ##### compute reward and place pirate to new position #####
         # if pirate is on enemy position
@@ -104,6 +104,7 @@ class Environment:
             self._map[new_pirate_position] = self._pirate_code
             new_state = self.__get_state()
             reward = self._merchant_pos_reward
+            done = True
         else:
             self._map[old_pirate_position] = self._empty_sea_code
             self._map[new_pirate_position] = self._pirate_code

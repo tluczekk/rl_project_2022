@@ -33,7 +33,7 @@ class Agent:
 
         # Setting up replay buffer
         self.memory = ReplayBuffer(
-            action_size, config.agent_buffer_size, config.agent_batch_size, config.agent_experiences_per_sampling, seed, compute_weights
+            action_size, config.agent_buffer_size, config.agent_batch_size, config.agent_experiences_per_sampling, seed, compute_weights, self.config
         )
         self.time_step_nn = 0
         self.time_step_mem_par = 0
