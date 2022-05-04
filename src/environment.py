@@ -34,7 +34,7 @@ class Environment:
         # set visibility of pirate (change this value only if absolutely necessary)
         self._visibility_of_pirate = 2       # how many fields (in each direction) does the pirate see (i.e. 2 means the pirate seesa square of 25 fields)
         self._enemy_neg_reward = -10
-        self._step_neg_reward = -1
+        self._step_neg_reward = 0
         self._merchant_pos_reward = 10
         self._step_counter = 0          # this parameter is used to determine every other step (merchant and enemies move only every other step)
 
@@ -67,7 +67,6 @@ class Environment:
         reward = 0
         done = False
         info = ""
-
 
         ##### move pirate #####
         # get pirate action for random case
@@ -281,6 +280,9 @@ class Environment:
         # return flattened matrix
         return vis_area_matrix.flatten()
 
+    def get_state(self):
+        return np.array(self.__get_state())
+
     def __create_map(self):
         """
         :param config:
@@ -330,10 +332,11 @@ class Environment:
 
         return visibility_map
 
-    def reset_environment(self):
+    def reset(self):
         """This function resets the environment to an initial state. That means:
         - create new map
         - reset _step_counter to 0
         """
         self._step_counter = 0
         self._map = self.__create_map()
+        return self.__get_state()

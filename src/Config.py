@@ -3,6 +3,7 @@ import os
 import configparser
 import logging
 import random
+import math
 
 
 class Config:
@@ -76,11 +77,28 @@ class Config:
         agent_section = self.configuration['agent']
         self.agent_discount_factor_gamma = agent_section.getfloat('agent_discount_factor_gamma')
         self.agent_stepsize_alpha = agent_section.getfloat('agent_stepsize_alpha')
+        self.agent_buffer_size = agent_section.getint('agent_buffer_size')
+        self.agent_batch_size = agent_section.getint('agent_batch_size')
+        self.agent_gamma = agent_section.getfloat('agent_gamma')
+        self.agent_tau = agent_section.getfloat('agent_tau')
+        self.agent_learning_rate = agent_section.getfloat('agent_learning_rate')
+        self.agent_update_nn_every = agent_section.getint('agent_update_nn_every')
+        self.agent_update_mem_every = agent_section.getint('agent_update_mem_every')
+        self.agent_update_mem_par_every = agent_section.getint('agent_update_mem_par_every')
+        self.agent_experiences_per_sampling = math.ceil(self.agent_batch_size * self.agent_update_mem_every / self.agent_update_nn_every)
+
 
         # Experiment section
         experiment_section = self.configuration['experiment']
         self.exp_max_nbr_of_steps = experiment_section.getint('exp_max_nbr_of_steps')
         self.exp_nbr_game_per_exp = experiment_section.getint('exp_nbr_game_per_exp')
+
+        # Replay buffer section
+        buffer_section = self.configuration['buffer']
+        self.buf_alpha = buffer_section.getfloat('buf_alpha')
+        self.buf_alpha_decay = buffer_section.getfloat('buf_alpha_decay')
+        self.buf_beta = buffer_section.getfloat('buf_beta')
+        self.buf_beta_growth = buffer_section.getfloat('buf_beta_growth')
 
         # Persistence options
         # self.load_model_name = self.configuratio['load_model_name']   # enter name if you want to load an existing model

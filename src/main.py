@@ -2,7 +2,8 @@ from Config import Config
 import sys
 from experiment import Experiment
 import logging
-
+from matplotlib import pyplot as plt
+import time
 # set logging
 logging.basicConfig(level=logging.INFO)
 
@@ -10,7 +11,13 @@ def main(config_file_name):
     config = Config(config_file_name)
     # Experiment
     experiment = Experiment(config)
-    experiment.run_experiment()
+    start = time.time()
+    scores = experiment.runExperiment(n_episodes=500)
+    end = time.time()
+    print(scores)
+    print(f"Elapsed time:\t{end - start}")
+    plt.plot(scores)
+    plt.savefig("experiment_results.png")
 
 
 if __name__ == '__main__':
