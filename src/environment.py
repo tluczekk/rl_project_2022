@@ -91,7 +91,7 @@ class Environment:
         ##### compute reward and place pirate to new position #####
         # if pirate is on enemy position
         if self._map[new_pirate_position] == self._enemy_code:
-            new_state = np.zeros(self.observation_space)
+            new_state = np.zeros(self.observation_space_size)
             reward = self._enemy_neg_reward
             done = True
             info = ""
