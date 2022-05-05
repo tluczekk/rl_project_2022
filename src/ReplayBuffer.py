@@ -111,6 +111,10 @@ class ReplayBuffer:
         print("Sum of probabilities after:\t", sum_prob_after)
 
     def add(self, state, action, reward, next_state, done):
+        """
+        Function adding new experience to memory
+        
+        """
         self.experience_count += 1
         index = self.experience_count % self.buffer_size
 

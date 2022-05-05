@@ -1,6 +1,10 @@
+from collections import deque
+
+import numpy as np
 from Config import Config
 from agent import Agent_DQN
 from environment import Environment
+import torch 
 
 class Experiment:
 
@@ -18,12 +22,12 @@ class Experiment:
         This function runs the main algorithm
         """
         scores = []
+        scores_window = deque(maxlen=100)
+        scores_avgs = []
         eps = eps_start
 
         for episode in range(1, n_episodes+1):
             state = self.environment.reset()
-            #env = Environment(self.config)
-            #state = self.environment.get_state()
             score = 0
             for t in range(max_t):
                 action = self.agent.act(state, eps)
@@ -34,14 +38,19 @@ class Experiment:
                 if done:
                     break
             scores.append(score)
+            scores_window.append(score)
             eps = max(eps_end, eps_decay*eps)
+            if episode % 50 == 0:
+                scores_avgs.append(np.mean(scores_window))
+        
+        self.saveResults('model.pth')
+        return scores, scores_avgs
 
-        return scores
-
-    def saveResults(self):
+    def saveResults(self, path):
         """
 
         """
-        pass
+        # Saving the model for later evaluation
+        torch.save(self.agent.qnet_local.state_dict(), path)
 
     

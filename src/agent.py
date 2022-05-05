@@ -35,13 +35,16 @@ class Agent:
         self.memory = ReplayBuffer(
             action_size, config.agent_buffer_size, config.agent_batch_size, config.agent_experiences_per_sampling, seed, compute_weights, self.config
         )
+        # Counters for updating neural network, parameters and memory sampling
         self.time_step_nn = 0
         self.time_step_mem_par = 0
         self.time_step_mem = 0
 
     def step(self, state, action, reward, next_state, done):
+        # adding current tupple to buffer
         self.memory.add(state, action, reward, next_state, done)
 
+        # Updating counters
         self.time_step_nn = (self.time_step_nn + 1) % self.config.agent_update_nn_every
         self.time_step_mem = (self.time_step_mem + 1) % self.config.agent_update_mem_every
         self.time_step_mem_par = (self.time_step_mem_par + 1) % self.config.agent_update_mem_par_every
