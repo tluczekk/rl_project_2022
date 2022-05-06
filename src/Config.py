@@ -39,6 +39,7 @@ class Config:
         self.env_size = 10
         self.env_nbr_enemies = 5
         self.env_action_success_prob = 1
+        self.env_move_enemies_merchants = False
 
         # agent
         self.agent_discount_factor_gamma = 0.9
@@ -62,6 +63,7 @@ class Config:
         self.env_random_map = environment_section.getboolean('env_random_map')                     # size, nbr of enemies and merchants is random
         self.env_random_enemies = environment_section.getboolean('env_random_enemies')            # only nbr of enemies is random
         self.env_random_merchants = environment_section.getboolean('env_random_merchants')         # only nbr of merchants is random        ## environment
+        self.env_move_enemies_merchants = environment_section.getboolean('env_move_enemies_merchants')  # indicatates if other ships shall move (or stay always at the same place)
 
         # set random values if specified in config
         if self.env_random_map:

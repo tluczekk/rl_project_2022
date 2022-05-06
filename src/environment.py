@@ -39,8 +39,8 @@ class Environment:
         self._step_counter = 0          # this parameter is used to determine every other step (merchant and enemies move only every other step)
 
         ## params for external use
-        self.observation_space = (self._visibility_of_pirate*2+1)**2
-        self.action_space = len(Action)
+        self.observation_space_size = (self._visibility_of_pirate*2+1)**2
+        self.action_space_size = len(Action)
 
         # initialize map
         self._map = self.__create_map()
@@ -67,7 +67,6 @@ class Environment:
         reward = 0
         done = False
         info = ""
-        
 
         ##### move pirate #####
         # get pirate action for random case
@@ -86,14 +85,13 @@ class Environment:
             new_pirate_position = old_pirate_position
 
         ##### move other ships #####
-        #if self.config.env_move_enemies_merchants:
-        if True:
+        if self.config.env_move_enemies_merchants:
             self._map = self.__get_tmp_map_with_moved_enemies_merchants()
 
         ##### compute reward and place pirate to new position #####
         # if pirate is on enemy position
         if self._map[new_pirate_position] == self._enemy_code:
-            new_state = np.zeros(self.observation_space)
+            new_state = np.zeros(self.observation_space_size)
             reward = self._enemy_neg_reward
             done = True
             info = ""
