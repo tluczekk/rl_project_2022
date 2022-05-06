@@ -112,14 +112,16 @@ The agent \say{perceives} the environment which lies inside a certain distance a
 The agent will receive this state as a flattened vector.
 
 \section{Algorithm}
-We implemented a Deep Q-Learning Algorithm with experience replay according to \cite{schaul_2016} and \todo{insert source for dq code}... We use a pytorch neural network with three layers... 
+We implemented a Deep Q-Learning Algorithm with experience replay according to \cite{schaul_2016} and \cite{crabe_2020}. This particular implementation differs from the one where the replay buffer is sampled uniformly, in the way that each experience is sampled with some probability, which is dependent on its priority - which in turn depends on loss function value after forward pass on Q-network, trained with said experience. Moreover authors introduce two parameters alpha and beta, which decay and grow through the training process respectively, to avoid overfitting. \\
+As a baseline method to compare our results we plan to use plain Q-Learning, implemented in class. Main challenge in using DQN algorithm with experience replay is the computational complexity, as updating the Q-network is heavy on CPU. Hence in order to optimize hyperparameters, GPU computations will come in handy. Q-Network is a PyTorch model, hence its state dictionary can be saved and later reproduced as agent's policy.
 
 \section{Next steps}
 At the moment we are progressing according to plan. The next steps will be the following:
 \begin{itemize}
 	\item debugging: Interaction between agent and environment does not work perfectly, movement of non-agent ships does not work perfectly
 	\item perhaps we implement the possibility to control the agent choice (Deep Q-Learning or Q-Learning) with the configuration file we use for the parameter settings.
-
+	\item Running environment on baseline method (Q-Learning) to set a benchmark.
+	\item Tweaking hyperparameters and running training on greater number of episodes, ideally on GPU as PyTorch can take advantage of that
 \end{itemize}
 
 
@@ -129,6 +131,12 @@ At the moment we are progressing according to plan. The next steps will be the f
 \bibitem{schaul_2016}
 T. Schaul, J. Quan, I. Antonoglou, D. Silver (2016): Prioritized Experience Replay. Published at ICLR 2016.\\
 \texttt{https://arxiv.org/pdf/2002.01370.pdf}
+
+\bibitem{crabe_2020}
+G. Crabe (2020): 
+How to implement Prioritized Experience Replay for a Deep Q-Network. Published in Towards Data Science 2020.\\
+\texttt{https://towardsdatascience.com/how-to-implement-prioritized-experience-replay-for-a-deep-q-network-a710beecd77b}
+
 
 \end{thebibliography}
 

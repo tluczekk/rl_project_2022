@@ -12,11 +12,12 @@ def main(config_file_name):
     # Experiment
     experiment = Experiment(config)
     start = time.time()
-    scores = experiment.runExperiment(n_episodes=500)
+    scores, scores_avgs = experiment.runExperiment(n_episodes=4000)
     end = time.time()
     print(scores)
     print(f"Elapsed time:\t{end - start}")
-    plt.plot(scores)
+    #plt.plot(scores)
+    plt.plot(scores_avgs)
     plt.savefig("experiment_results.png")
 
 
