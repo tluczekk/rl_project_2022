@@ -40,6 +40,7 @@ class Config:
         self.env_nbr_enemies = 5
         self.env_action_success_prob = 1
         self.env_move_enemies_merchants = False
+        self.pirate_depth_of_view = 2
 
         # agent
         self.agent_discount_factor_gamma = 0.9
@@ -64,6 +65,10 @@ class Config:
         self.env_random_enemies = environment_section.getboolean('env_random_enemies')            # only nbr of enemies is random
         self.env_random_merchants = environment_section.getboolean('env_random_merchants')         # only nbr of merchants is random        ## environment
         self.env_move_enemies_merchants = environment_section.getboolean('env_move_enemies_merchants')  # indicatates if other ships shall move (or stay always at the same place)
+
+        # compute state_size basing on visibility of agent
+        self.pirate_depth_of_view = environment_section.getint('env_pirate_depth_of_view')      # how far the pirate is able to see (defines statesize)
+        self.state_size = (self.pirate_depth_of_view*2+1)**2
 
         # set random values if specified in config
         if self.env_random_map:
@@ -102,6 +107,7 @@ class Config:
 
         # Persistence options
         # self.load_model_name = self.configuratio['load_model_name']   # enter name if you want to load an existing model
+
 
     def __set_random_merchants(self):
         """

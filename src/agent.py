@@ -14,20 +14,21 @@ import torch.optim as optim
 import math
 import operator
 from Config import Config
+from enums import Action
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 class Agent:
-    def __init__(self, config: Config, state_size, action_size, seed, compute_weights = False) -> None:
-        self.state_size = state_size
+    def __init__(self, config: Config, action_size, seed, compute_weights = False) -> None:
+        self.state_size = config.state_size
         self.action_size = action_size
         self.seed = random.seed(seed)
         self.compute_weights = compute_weights
         self.config = config
 
         # Two Q-networks to avoid overestimation bias
-        self.qnet_local = QNet(state_size, action_size, seed).to(device)
-        self.qnet_target = QNet(state_size, action_size, seed).to(device)
+        self.qnet_local = QNet(self.state_size, action_size, seed).to(device)
+        self.qnet_target = QNet(self.state_size, action_size, seed).to(device)
         self.optimizer = optim.Adam(self.qnet_local.parameters(), lr=self.config.agent_learning_rate)
         self.criterion = nn.MSELoss()
 
@@ -101,4 +102,4 @@ class Agent_DQN(Agent):
         # Getting parameters of environment
         # Each field can be either merchant, enemy or empty, except field of agent
         self._visibility_of_pirate = 2
-        super().__init__(config, (self._visibility_of_pirate*2+1)**2, 4, 123)
+        super().__init__(config, len(Action), 123)

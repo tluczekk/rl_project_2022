@@ -32,21 +32,22 @@ class Environment:
 
         ## initialize parameters which are independant of config
         # set visibility of pirate (change this value only if absolutely necessary)
-        self._visibility_of_pirate = 2       # how many fields (in each direction) does the pirate see (i.e. 2 means the pirate seesa square of 25 fields)
         self._enemy_neg_reward = -10
         self._step_neg_reward = -1
         self._merchant_pos_reward = 100
         self._step_counter = 0          # this parameter is used to determine every other step (merchant and enemies move only every other step)
 
         ## params for external use
-        self.observation_space_size = (self._visibility_of_pirate*2+1)**2
         self.action_space_size = len(Action)
 
         # initialize map
         self._map = self.__create_map()
 
+        # count number of enemies (if 0 --> done)
+        self._number_of_merchants = self.config.env_nbr_merchants
+
     def print_map(self):
-        i = self.config.env_size + self._visibility_of_pirate
+        i = self.config.env_size + self.config.pirate_depth_of_view
         print(self._map[2:i, 2:i], "\n")
 
     def step(self, action: int):
@@ -91,7 +92,7 @@ class Environment:
         ##### compute reward and place pirate to new position #####
         # if pirate is on enemy position
         if self._map[new_pirate_position] == self._enemy_code:
-            new_state = np.zeros(self.observation_space_size)
+            new_state = np.zeros(self.config.state_size)
             reward = self._enemy_neg_reward
             done = True
             info = ""
@@ -102,6 +103,12 @@ class Environment:
             self._map[new_pirate_position] = self._pirate_code
             new_state = self.__get_state()
             reward = self._merchant_pos_reward
+            self._number_of_merchants -= 1
+            # if pirate catched all merchants --> game is over
+            if self._number_of_merchants == 0:
+                done = True
+                return (new_state, reward, done, info)
+                logging.info("---------- PIRATE CATCHED ALL MERCHANTS ----------")
         else:
             self._map[old_pirate_position] = self._empty_sea_code
             self._map[new_pirate_position] = self._pirate_code
@@ -269,10 +276,10 @@ class Environment:
         pirate_position = int(res[0]), int(res[1])
 
         # get visible area
-        i_row_upper = pirate_position[0]-self._visibility_of_pirate
-        i_row_lower = pirate_position[0]+self._visibility_of_pirate + 1
-        i_col_left = pirate_position[1]-self._visibility_of_pirate
-        i_col_right = pirate_position[1]+self._visibility_of_pirate + 1
+        i_row_upper = pirate_position[0]-self.config.pirate_depth_of_view
+        i_row_lower = pirate_position[0]+self.config.pirate_depth_of_view + 1
+        i_col_left = pirate_position[1]-self.config.pirate_depth_of_view
+        i_col_right = pirate_position[1]+self.config.pirate_depth_of_view + 1
 
         vis_area_matrix = self._map[i_row_upper:i_row_lower, i_col_left:i_col_right]
         # logging.info(f'Visibility area (not flattened):\n {vis_area_matrix}\n')
@@ -315,14 +322,14 @@ class Environment:
             map[np.unravel_index(m, (map_side_len, map_side_len))] = self._enemy_code
 
         # expand map (pirate has to see outside map = -1)
-        visib_side_len = self.config.env_size + self._visibility_of_pirate*2
+        visib_side_len = self.config.env_size + self.config.pirate_depth_of_view*2
         visibility_map = np.full((visib_side_len, visib_side_len), -1)
 
         # place actual map inside of visible map
         # source: https://stackoverflow.com/questions/40833073/insert-matrix-into-the-center-of-another-matrix-in-python
         lenbig = visibility_map.shape[0]  # side length of big (visibility) map
-        lower = self._visibility_of_pirate
-        upper = lenbig - self._visibility_of_pirate
+        lower = self.config.pirate_depth_of_view
+        upper = lenbig - self.config.pirate_depth_of_view
         visibility_map[lower:upper, lower:upper] = map
 
         # logging.info(f'Map side length: {self.config.env_size}\n'

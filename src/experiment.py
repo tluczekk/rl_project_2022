@@ -1,3 +1,4 @@
+import logging
 from collections import deque
 
 import numpy as np
@@ -27,6 +28,7 @@ class Experiment:
         eps = eps_start
 
         for episode in range(1, n_episodes+1):
+            logging.info(f'########### Episode {episode} ###########\n')
             state = self.environment.reset()
             score = 0
             for t in range(max_t):
