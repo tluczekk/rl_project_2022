@@ -41,7 +41,7 @@ class Environment:
         self.action_space_size = len(Action)
 
         # initialize map
-        self._map = self.__create_map()
+        self._map, self._only_sea_map = self.__create_map()
 
         # count number of enemies (if 0 --> done)
         self._number_of_merchants = self.config.env_nbr_merchants
@@ -92,7 +92,7 @@ class Environment:
         ##### compute reward and place pirate to new position #####
         # if pirate is on enemy position
         if self._map[new_pirate_position] == self._enemy_code:
-            new_state = np.zeros(self.config.state_size)
+            new_state = np.zeros(self.config.state_size)        # no actual state needed, because game over
             reward = self._enemy_neg_reward
             done = True
             info = ""
@@ -249,6 +249,11 @@ class Environment:
     def __get_state(self):
         """
         This function returns an array which represents the visible area around the pirate ship.
+        There are two alternatives (depending on self.config.env_frozen_lake_state:
+        1. The agent sees only a square around him (smaller than the whole map)
+        2. The agent sees always the whole map (this corresponds to the classic frozen lake environment)
+
+        *** 1. small square ***
         The area around the pirate ship is defined as a square with sidelenth = 5, where the pirate is in the middle
         field of this square (see example below)
 
@@ -267,25 +272,33 @@ class Environment:
 
         [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,]
 
+        *** 2.whole map ***
+        In this case the agent gets the whole map flattended as array.
+
         :param:
         - none --> checks for itself, where the agent is on the map
 
         """
-        # get position of pirate
-        res = np.where(self._map == self._pirate_code)
-        pirate_position = int(res[0]), int(res[1])
+        ### second case: return sea_map
+        if self.config.env_frozen_lake_state:
+            return self._only_sea_map.flatten()
+        ### first case: return only small square around pirate
+        else:
+            # get position of pirate
+            res = np.where(self._map == self._pirate_code)
+            pirate_position = int(res[0]), int(res[1])
 
-        # get visible area
-        i_row_upper = pirate_position[0]-self.config.pirate_depth_of_view
-        i_row_lower = pirate_position[0]+self.config.pirate_depth_of_view + 1
-        i_col_left = pirate_position[1]-self.config.pirate_depth_of_view
-        i_col_right = pirate_position[1]+self.config.pirate_depth_of_view + 1
+            # get visible area
+            i_row_upper = pirate_position[0]-self.config.pirate_depth_of_view
+            i_row_lower = pirate_position[0]+self.config.pirate_depth_of_view + 1
+            i_col_left = pirate_position[1]-self.config.pirate_depth_of_view
+            i_col_right = pirate_position[1]+self.config.pirate_depth_of_view + 1
 
-        vis_area_matrix = self._map[i_row_upper:i_row_lower, i_col_left:i_col_right]
-        # logging.info(f'Visibility area (not flattened):\n {vis_area_matrix}\n')
+            vis_area_matrix = self._map[i_row_upper:i_row_lower, i_col_left:i_col_right]
+            # logging.info(f'Visibility area (not flattened):\n {vis_area_matrix}\n')
 
-        # return flattened matrix
-        return vis_area_matrix.flatten()
+            # return flattened matrix
+            return vis_area_matrix.flatten()
 
     def get_state(self):
         return np.array(self.__get_state())
@@ -337,7 +350,8 @@ class Environment:
         #          f'Number of enemies: {self.config.env_nbr_enemies}\n'
         #          f'Map:\n {visibility_map}\n')
 
-        return visibility_map
+        # return both maps (big map, and small only-sea_map)
+        return visibility_map, map
 
     def reset(self):
         """This function resets the environment to an initial state. That means:
@@ -345,5 +359,5 @@ class Environment:
         - reset _step_counter to 0
         """
         self._step_counter = 0
-        self._map = self.__create_map()
+        self._map, self._only_sea_map = self.__create_map()
         return self.__get_state()

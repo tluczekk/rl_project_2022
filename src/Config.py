@@ -41,6 +41,7 @@ class Config:
         self.env_action_success_prob = 1
         self.env_move_enemies_merchants = False
         self.pirate_depth_of_view = 2
+        self.env_frozen_lake_state = False
 
         # agent
         self.agent_discount_factor_gamma = 0.9
@@ -69,6 +70,10 @@ class Config:
         # compute state_size basing on visibility of agent
         self.pirate_depth_of_view = environment_section.getint('env_pirate_depth_of_view')      # how far the pirate is able to see (defines statesize)
         self.state_size = (self.pirate_depth_of_view*2+1)**2
+
+        self.env_frozen_lake_state = environment_section.getboolean('env_frozen_lake_state')  # if this is true, env returns always the whole map as state (not only a square around the pirate)
+        if self.env_frozen_lake_state:
+            self.state_size = self.env_size**2  # in this case just return the side length of the map ** 2
 
         # set random values if specified in config
         if self.env_random_map:

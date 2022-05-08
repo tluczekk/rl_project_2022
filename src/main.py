@@ -28,7 +28,7 @@ if __name__ == '__main__':
 
         # list different configs
         main('config_1')
-        # main('config_1')
+        # main('config_2_frozen_lake')
         # main('config_1')
 
 
