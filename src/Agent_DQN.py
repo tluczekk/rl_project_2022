@@ -1,13 +1,10 @@
-"""
-Source: https://arxiv.org/pdf/1511.05952.pdf
-"""
 import numpy as np
 import random
 
 from QNet import QNet
 from ReplayBuffer import ReplayBuffer
 
-import torch 
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -18,8 +15,14 @@ from enums import Action
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-class Agent:
+class Agent_DQN(Agent):
     def __init__(self, config: Config, action_size, seed, compute_weights = False) -> None:
+        # Hyperparameters
+        self.config = config
+        # Getting parameters of environment
+        # Each field can be either merchant, enemy or empty, except field of agent
+        super().__init__(config, len(Action), 123)
+
         self.state_size = config.state_size
         self.action_size = action_size
         self.seed = random.seed(seed)
@@ -85,21 +88,11 @@ class Agent:
         loss.backward()
         self.optimizer.step()
 
-        self.soft_update(self.qnet_local, self.qnet_target, self.config.agent_tau)
+        self.update(self.qnet_local, self.qnet_target, self.config.agent_tau)
 
         delta = abs(expected_values - output.detach()).numpy()
         self.memory.update_priorities(delta, indices)
 
-    def soft_update(self, local_model, target_model, tau):
+    def update(self, local_model, target_model, tau):
         for target_param, local_param in zip(target_model.parameters(), local_model.parameters()):
             target_param.data.copy_(tau*local_param.data + (1.0 - tau)*target_param.data)
-
-
-class Agent_DQN(Agent):
-   def __init__(self, config: Config):
-        # Hyperparameters
-        self.config = config
-        # Getting parameters of environment
-        # Each field can be either merchant, enemy or empty, except field of agent
-        self._visibility_of_pirate = 2
-        super().__init__(config, len(Action), 123)

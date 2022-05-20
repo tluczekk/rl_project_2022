@@ -1,11 +1,11 @@
 import logging
 from collections import deque
-
+import Agent
 import numpy as np
 from Config import Config
-from agent import Agent_DQN
 from environment import Environment
-import torch 
+import torch
+
 
 class Experiment:
 
@@ -14,25 +14,25 @@ class Experiment:
 
         """
         self.config = config
-        self.agent = Agent_DQN(config)
+        self.agent = Agent.agentSwitcher(config)
         self.environment = Environment(config)
 
 
-    def runExperiment(self, n_episodes=200, max_t=500, eps_start=1.0, eps_end=0.001, eps_decay=0.995) -> None:
+    def runExperiment(self, config) -> None:
         """
         This function runs the main algorithm
         """
+
         scores = []
         scores_window = deque(maxlen=100)
         scores_avgs = []
-        eps = eps_start
 
-        for episode in range(1, n_episodes+1):
+        for episode in range(1, config.exp_episodes + 1):
             logging.info(f'########### Episode {episode} ###########\n')
             state = self.environment.reset()
             score = 0
-            for t in range(max_t):
-                action = self.agent.act(state, eps)
+            for t in range(config.exp_max_nbr_of_steps):
+                action = self.agent.generateAction(currentState=state)
                 next_state, reward, done, _ = self.environment.step(action)
                 self.agent.step(state, action, reward, next_state, done)
                 state = next_state
@@ -41,7 +41,7 @@ class Experiment:
                     break
             scores.append(score)
             scores_window.append(score)
-            eps = max(eps_end, eps_decay*eps)
+            eps = max(config.env_eps_end, config.env_eps_decay * eps)
             if episode % 50 == 0:
                 scores_avgs.append(np.mean(scores_window))
         

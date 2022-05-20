@@ -58,6 +58,9 @@ class Config:
         """
         # Environment section
         environment_section = self.configuration['environment']
+        self.env_eps_start = environment_section.getfloat('env_eps_start')
+        self.env_eps_end = environment_section.getfloat('env_eps_end')
+        self.env_eps_decay = environment_section.getfloat('env_eps_decay')
         self.env_size = environment_section.getint('env_size')                                 # side length of square map
         self.env_nbr_enemies = environment_section.getint('env_nbr_enemies')
         self.env_nbr_merchants = environment_section.getint('env_nbr_merchants')
@@ -85,6 +88,7 @@ class Config:
 
         # Agent section
         agent_section = self.configuration['agent']
+        self.agent_name = agent_section.read_string('agent_name')
         self.agent_discount_factor_gamma = agent_section.getfloat('agent_discount_factor_gamma')
         self.agent_stepsize_alpha = agent_section.getfloat('agent_stepsize_alpha')
         self.agent_buffer_size = agent_section.getint('agent_buffer_size')
@@ -101,7 +105,7 @@ class Config:
         # Experiment section
         experiment_section = self.configuration['experiment']
         self.exp_max_nbr_of_steps = experiment_section.getint('exp_max_nbr_of_steps')
-        self.exp_nbr_game_per_exp = experiment_section.getint('exp_nbr_game_per_exp')
+        self.exp_episodes = experiment_section.getint('exp_episodes')
 
         # Replay buffer section
         buffer_section = self.configuration['buffer']

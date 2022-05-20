@@ -3,5 +3,7 @@ import logging
 from enums import Action
 
 
+print(map(int, Action))
+
 
 
