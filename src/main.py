@@ -12,7 +12,7 @@ def main(config_file_name):
     # Experiment
     experiment = Experiment(config)
     start = time.time()
-    scores, scores_avgs = experiment.runExperiment(n_episodes=4000)
+    scores, scores_avgs = experiment.runExperiment()
     end = time.time()
     print(scores)
     print(f"Elapsed time:\t{end - start}")
