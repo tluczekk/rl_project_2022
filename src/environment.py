@@ -32,9 +32,9 @@ class Environment:
 
         ## initialize parameters which are independant of config
         # set visibility of pirate (change this value only if absolutely necessary)
-        self._enemy_neg_reward = -10
+        self._enemy_neg_reward = -100
         self._step_neg_reward = -1
-        self._merchant_pos_reward = 100
+        self._merchant_pos_reward = 1000
         self._step_counter = 0          # this parameter is used to determine every other step (merchant and enemies move only every other step)
 
         ## params for external use
