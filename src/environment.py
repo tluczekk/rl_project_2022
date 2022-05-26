@@ -77,6 +77,7 @@ class Environment:
 
         # get pirate position
         res = np.where(self._map == self._pirate_code)
+        print(f"RESULT {res[0]} {res[1]}")
         old_pirate_position = int(res[0]), int(res[1])
         # get new position
         new_pirate_position = self.__get_new_position(action, old_pirate_position)

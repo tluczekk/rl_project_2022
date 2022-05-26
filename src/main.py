@@ -14,7 +14,7 @@ def main(config_file_name):
     # Experiment
     experiment = Experiment(config)
     start = time.time()
-    #scores, scores_avgs = experiment.runExperiment(n_episodes=5000)
+    #scores, scores_avgs = experiment.runExperiment(n_episodes=500)
     sac(Environment(config))
     end = time.time()
     #print(scores)

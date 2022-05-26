@@ -13,7 +13,7 @@ import gym
 import time
 from copy import deepcopy
 from environment import Environment
-
+import random
 
 def combined_shape(length, shape=None):
     if shape is None:
@@ -368,27 +368,32 @@ def sac(env_fn, actor_critic=MLPActorCritic, ac_kwargs=dict(), seed=0,
             o, d, ep_ret, ep_len = test_env.reset(), False, 0, 0
             while not(d or (ep_len == max_ep_len)):
                 # Take deterministic actions at test time 
-                o, r, d, _ = test_env.step(get_action(o, True))
+                akcja = get_action(o, True)
+                print(f"AKCJA: {akcja}")
+                o, r, d, _ = test_env.step(np.argmax(akcja))
                 ep_ret += r
                 ep_len += 1
             #logger.store(TestEpRet=ep_ret, TestEpLen=ep_len)
+        print(f"Test ukończon")
 
     # Prepare for interaction with environment
     total_steps = steps_per_epoch * epochs
     start_time = time.time()
     o, ep_ret, ep_len = env.reset(), 0, 0
 
+    ile_razy = 0
     # Main loop: collect experience in env and update/log each epoch
     for t in range(total_steps):
-        
+        ile_razy += 1
         # Until start_steps have elapsed, randomly sample actions
         # from a uniform distribution for better exploration. Afterwards, 
         # use the learned policy. 
         if t > start_steps:
-            a = get_action(o)
+            a = np.argmax(get_action(o))
+            print(f"AKCJAAA {a}")
         else:
-            a = env.action_space.sample()
-
+            a = random.sample([0,1,2,3], 1)[0]
+        print(f"Ile razy {ile_razy}")
         # Step the env
         o2, r, d, _ = env.step(a)
         ep_ret += r
@@ -420,14 +425,14 @@ def sac(env_fn, actor_critic=MLPActorCritic, ac_kwargs=dict(), seed=0,
         # End of epoch handling
         if (t+1) % steps_per_epoch == 0:
             epoch = (t+1) // steps_per_epoch
-
+            
             # Save model
             #if (epoch % save_freq == 0) or (epoch == epochs):
                 #logger.save_state({'env': env}, None)
 
             # Test the performance of the deterministic version of the agent.
             test_agent()
-
+            o, ep_ret, ep_len = env.reset(), 0, 0
             """
 
             logger.log_tabular('Epoch', epoch)
