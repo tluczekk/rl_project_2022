@@ -14,6 +14,7 @@ import time
 from copy import deepcopy
 from environment import Environment
 import random
+from collections import deque
 
 def combined_shape(length, shape=None):
     if shape is None:
@@ -381,24 +382,26 @@ def sac(env_fn, actor_critic=MLPActorCritic, ac_kwargs=dict(), seed=0,
     start_time = time.time()
     o, ep_ret, ep_len = env.reset(), 0, 0
 
-    ile_razy = 0
+
+    scores = []
+    scores_window = deque(maxlen=100)
+    scores_avgs = []
+    d_count = 0
     # Main loop: collect experience in env and update/log each epoch
     for t in range(total_steps):
-        ile_razy += 1
         # Until start_steps have elapsed, randomly sample actions
         # from a uniform distribution for better exploration. Afterwards, 
         # use the learned policy. 
         if t > start_steps:
             a = np.argmax(get_action(o))
-            print(f"AKCJAAA {a}")
         else:
             a = random.sample([0,1,2,3], 1)[0]
-        print(f"Ile razy {ile_razy}")
         # Step the env
         o2, r, d, _ = env.step(a)
         ep_ret += r
         ep_len += 1
 
+        
         # Ignore the "done" signal if it comes from hitting the time
         # horizon (that is, when it's an artificial terminal signal
         # that isn't based on the agent's state)
@@ -414,6 +417,11 @@ def sac(env_fn, actor_critic=MLPActorCritic, ac_kwargs=dict(), seed=0,
         # End of trajectory handling
         if d or (ep_len == max_ep_len):
             #logger.store(EpRet=ep_ret, EpLen=ep_len)
+            d_count += 1
+            scores.append(ep_ret)
+            scores_window.append(ep_ret)
+            if d_count % 50 == 0:
+                scores_avgs.append(np.mean(scores_window))
             o, ep_ret, ep_len = env.reset(), 0, 0
 
         # Update handling
@@ -449,4 +457,4 @@ def sac(env_fn, actor_critic=MLPActorCritic, ac_kwargs=dict(), seed=0,
             logger.log_tabular('Time', time.time()-start_time)
             logger.dump_tabular()
             """
-
+    return scores, scores_avgs

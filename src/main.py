@@ -15,13 +15,13 @@ def main(config_file_name):
     experiment = Experiment(config)
     start = time.time()
     #scores, scores_avgs = experiment.runExperiment(n_episodes=500)
-    sac(Environment(config))
+    scores, scores_avgs = sac(Environment(config))
     end = time.time()
     #print(scores)
     print(f"Elapsed time:\t{end - start}")
     #plt.plot(scores)
-    #plt.plot(scores_avgs)
-    #plt.savefig("experiment_results.png")
+    plt.plot(scores_avgs)
+    plt.savefig("experiment_results.png")
 
 
 if __name__ == '__main__':
