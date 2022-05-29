@@ -38,7 +38,9 @@ class Config:
         self.env_nbr_merchants = 5
         self.env_size = 10
         self.env_nbr_enemies = 5
-        self.env_action_success_prob = 1
+        self.env_epsilon_start = 1
+        self.env_epsilon_end = 1
+        self.env_epsilon_decay = 0.99
         self.env_move_enemies_merchants = False
         self.pirate_depth_of_view = 2
         self.env_frozen_lake_state = False
@@ -61,7 +63,9 @@ class Config:
         self.env_size = environment_section.getint('env_size')                                 # side length of square map
         self.env_nbr_enemies = environment_section.getint('env_nbr_enemies')
         self.env_nbr_merchants = environment_section.getint('env_nbr_merchants')
-        self.env_action_success_prob = environment_section.getfloat('env_action_success_prob')    # probability that action will succeed
+        self.env_epsilon_start = environment_section.getfloat('env_epsilon_start')    # probability that action will be random
+        self.env_epsilon_end = environment_section.getfloat('env_epsilon_end')
+        self.env_epsilon_decay = environment_section.getfloat('env_epsilon_decay')
         self.env_random_map = environment_section.getboolean('env_random_map')                     # size, nbr of enemies and merchants is random
         self.env_random_enemies = environment_section.getboolean('env_random_enemies')            # only nbr of enemies is random
         self.env_random_merchants = environment_section.getboolean('env_random_merchants')         # only nbr of merchants is random        ## environment
@@ -101,7 +105,7 @@ class Config:
         # Experiment section
         experiment_section = self.configuration['experiment']
         self.exp_max_nbr_of_steps = experiment_section.getint('exp_max_nbr_of_steps')
-        self.exp_nbr_game_per_exp = experiment_section.getint('exp_nbr_game_per_exp')
+        self.exp_nbr_episodes = experiment_section.getint('exp_nbr_episodes')
 
         # Replay buffer section
         buffer_section = self.configuration['buffer']

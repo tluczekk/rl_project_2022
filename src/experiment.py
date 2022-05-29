@@ -18,20 +18,20 @@ class Experiment:
         self.environment = Environment(config)
 
 
-    def runExperiment(self, n_episodes=200, max_t=500, eps_start=1.0, eps_end=0.001, eps_decay=0.995) -> None:
+    def runExperiment(self) -> None:
         """
         This function runs the main algorithm
         """
         scores = []
         scores_window = deque(maxlen=100)
         scores_avgs = []
-        eps = eps_start
+        eps = self.config.env_epsilon_start
 
-        for episode in range(1, n_episodes+1):
+        for episode in range(1, self.config.exp_nbr_episodes+1):
             logging.info(f'########### Episode {episode} ###########\n')
             state = self.environment.reset()
             score = 0
-            for t in range(max_t):
+            for t in range(self.config.exp_max_nbr_of_steps):
                 action = self.agent.act(state, eps)
                 next_state, reward, done, _ = self.environment.step(action)
                 self.agent.step(state, action, reward, next_state, done)
@@ -41,7 +41,7 @@ class Experiment:
                     break
             scores.append(score)
             scores_window.append(score)
-            eps = max(eps_end, eps_decay*eps)
+            eps = max(self.config.env_epsilon_end, self.config.env_epsilon_decay*eps)
             if episode % 50 == 0:
                 scores_avgs.append(np.mean(scores_window))
         

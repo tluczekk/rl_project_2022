@@ -14,8 +14,10 @@ def main(config_file_name):
     # Experiment
     experiment = Experiment(config)
     start = time.time()
+
     #scores, scores_avgs = experiment.runExperiment(n_episodes=500)
     scores, scores_avgs = sac(Environment(config))
+
     end = time.time()
     #print(scores)
     print(f"Elapsed time:\t{end - start}")

@@ -1,0 +1,174 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+% \geometry{margin=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+
+\usepackage{graphicx}         % integration of images
+\usepackage{float}			% place pictures at specific place in text
+\usepackage{amsmath}	% mathematical equations
+\usepackage{xcolor} 	% colored font
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage{hyperref} % link to sections
+
+
+
+%%% END Article customizations
+
+%%% The "real" document content comes below...
+
+\title{Project Report}
+\author{Jakub Tłuczek}
+%\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\begin{document}
+\maketitle
+
+\section{Summary}
+This project report summarizes the practical project of the course "Reinforcement Learning and Uncertainty" of the University of Neuchatel in the spring semester of 2022.
+
+The aim of the project was to implement a Reinforcement Learning algorithm on a frozen lake like environment\footnote{link to frozen lake} with additional complications. Our environment models a lake with enemies our agent the pirate has to avoid and merchant ships the agent has to catch. 
+The goal of our project is to optimize the parameterization of the implemented Rein-
+forcement Learning algorithm. For that we will run experiments with different parame-
+terizations of update function and environment. The experiments will be visualized and
+this visualizations will be used to find the optimal parameters of the update function.
+
+This report will cover the following topics:
+\begin{itemize}
+	\item our environment
+	\item the reinforcement learning algorithms we used
+	\item the results of our experiments
+	\item some remarks about the libraries we used and the general structure of our code
+\end{itemize}
+
+\section{Environment}
+The environment has been programmed from scratch. We didn't deviate from the original plan, which was:
+
+
+\begin{quote}
+Our environment represents a quadratic sea map where a pirate (the agent) wants to rob and destroy merchant ships. Each merchant ship will return a positive reward. If the agent robs all merchant ships, the game will be over. It will also be over after fixed amount of moves. There are also enemy ships moving on the map which the agent has to avoid. If the agent is on the same field as an enemy ship the game will also be over with a negative reward for the agent.\footnote{Cited from the project proposal}
+\end{quote}
+
+\clearpage
+
+\paragraph{Map}
+The followong shows a representation of our map with the following encoding: -1 = outside map, 0 = empty sea, 1 = pirate (our agent), 2 = merchant ship, 3 = pirate ship.
+
+\begin{verbatim}
+ -1 -1 -1 -1 -1 -1 -1 -1 -1
+ -1 -1 -1 -1 -1 -1 -1 -1 -1
+ -1 -1  1  0  0  0  3 -1 -1
+ -1 -1  0  0  0  2  0 -1 -1
+ -1 -1  0  0  0  0  2 -1 -1
+ -1 -1  0  0  3  0  0 -1 -1
+ -1 -1  0  0  0  0  0 -1 -1
+ -1 -1 -1 -1 -1 -1 -1 -1 -1
+ -1 -1 -1 -1 -1 -1 -1 -1 -1
+\end{verbatim}
+
+\paragraph{State}
+\label{sec:state}
+The agent \say{perceives} the environment which lies inside a certain distance around him. If the agent has a visibility distance of 2, with the above example map he see the following:
+ \begin{verbatim}
+ -1 -1 -1 -1 -1 
+ -1 -1 -1 -1 -1 
+ -1 -1  1  0  0 
+ -1 -1  0  0  0  
+ -1 -1  0  0  0 
+\end{verbatim}
+The agent will receive this state as a flattened vector.
+
+\paragraph{Flexible environment parameterization} 
+Our environment can be changed quite easily with the setting of the following parameters:
+\begin{itemize}
+	\item size of the environment (side length of the square) 
+	\item number of enemies (fixed or random)
+	\item number of merchants (fixed or random)
+	\item if the enemies and merchants shall move or if they stay at the same spot over the whole episode.
+	\item our 
+These parameters can be easily changed with the config file and allow us for example to generate an environment which equals the frozen lake environment (non moving enemies, no merchants). With a simple environment like this we can more easily debug the code or set a baseline.
+
+
+\end{itemize}
+
+\section{Algorithms}
+\paragraph{Q-Learning}
+We wanted to implement a Q-Learning algorithm to get a baseline for the Deep Q-Learning algorithm. While implementing this algorithm we noticed that the state space would be extremely big. For example: the state the agent receives from the environment if the agent has a visibility distance of 2 has a size of 25 (see hyperref[sec:state]{above}). When we don't count the agents position which in each state will be the same each field can have 4 values (outside map, empty sea, merchant, enemy). So in this exmaple which is our default map size the state space is $4^25$. Q-Learning needs a table with a field for every state-action-tuple. With a state space with size $4^25$ this is not reasonable to implement. 
+
+\paragraph{Deep Q-Learning} 
+We implemented a Deep Q-Learning algorithm with experience replay according to \cite{schaul_2016} and \cite{crabe_2020}. This particular implementation differs from the one where the replay buffer is sampled uniformly, in the way that each experience is sampled with some probability, which is dependent on its priority - which in turn depends on loss function value after forward pass on Q-network, trained with said experience. Moreover authors introduce two parameters alpha and beta, which decay and grow through the training process respectively, to avoid overfitting. \\
+As a baseline method to compare our results we plan to use plain Q-Learning, implemented in class. Main challenge in using DQN algorithm with experience replay is the computational complexity, as updating the Q-network is heavy on CPU. Hence in order to optimize hyperparameters, GPU computations will come in handy. Q-Network is a PyTorch model, hence its state dictionary can be saved and later reproduced as agent's policy.
+
+\section{Next steps}
+At the moment we are progressing according to plan. The next steps will be the following:
+\begin{itemize}
+	\item debugging: Interaction between agent and environment does not work perfectly, movement of non-agent ships does not work perfectly
+	\item perhaps we implement the possibility to control the agent choice (Deep Q-Learning or Q-Learning) with the configuration file we use for the parameter settings.
+	\item Running environment on baseline method (Q-Learning) to set a benchmark.
+	\item Tweaking hyperparameters and running training on greater number of episodes, ideally on GPU as PyTorch can take advantage of that
+\end{itemize}
+
+
+
+\begin{thebibliography}{2}
+
+\bibitem{schaul_2016}
+T. Schaul, J. Quan, I. Antonoglou, D. Silver (2016): Prioritized Experience Replay. Published at ICLR 2016.\\
+\texttt{https://arxiv.org/pdf/2002.01370.pdf}
+
+\bibitem{crabe_2020}
+G. Crabe (2020): 
+How to implement Prioritized Experience Replay for a Deep Q-Network. Published in Towards Data Science 2020.\\
+\texttt{https://towardsdatascience.com/how-to-implement-prioritized-experience\\-replay-for-a-deep-q-network-a710beecd77b}
+
+
+\end{thebibliography}
+
+\end{document}
