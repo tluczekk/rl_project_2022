@@ -9,12 +9,12 @@ import torch
 
 class Experiment:
 
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, compute_weights = False):
         """
 
         """
         self.config = config
-        self.agent = Agent_DQN(config)
+        self.agent = Agent_DQN(config, compute_weights)
         self.environment = Environment(config)
 
 

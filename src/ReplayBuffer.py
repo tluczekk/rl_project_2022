@@ -67,7 +67,10 @@ class ReplayBuffer:
                 self.priorities_max = updated_priority
             
             if self.compute_weights:
-                updated_weight = ((N * updated_priority)**(-self.beta))/self.weights_max
+                if updated_priority == 0:
+                    updated_weight = 0
+                else: 
+                    updated_weight = ((N * updated_priority)**(-self.beta))/self.weights_max
                 if updated_weight > self.weights_max:
                     self.weights_max = updated_weight
             else:
@@ -104,7 +107,10 @@ class ReplayBuffer:
             sum_prob_after += probability
             weight = 1
             if self.compute_weights:
-                weight = ((N * element.probability)**(-self.beta))/self.weights_max
+                if element.probability == 0:
+                    weight = 0
+                else: 
+                    weight = ((N * element.probability)**(-self.beta))/self.weights_max
             d = self.data(element.priority, probability, weight, element.index)
             self.memory_data[element.index] = d
         print("Sum of probabilities before:\t ", sum_prob_before)
