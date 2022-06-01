@@ -73,11 +73,11 @@ class Environment:
         # get pirate action for random case
         if np.random.uniform(0,1,1) > self.config.env_action_success_prob:
             action = np.random.randint(0,4)
-            logging.info(f'Random action: {action}\n')
+            #logging.info(f'Random action: {action}\n')
 
         # get pirate position
         res = np.where(self._map == self._pirate_code)
-        print(f"RESULT {res[0]} {res[1]}")
+        #print(f"RESULT {res[0]} {res[1]}")
         old_pirate_position = int(res[0]), int(res[1])
         # get new position
         new_pirate_position = self.__get_new_position(action, old_pirate_position)
@@ -117,10 +117,10 @@ class Environment:
             reward = self._step_neg_reward
 
 
-        logging.info(f'Reward: {reward}\n'
-                     f'Action: {action}\n'
-                     f'Done: {done}\n'
-                     f'Map:\n {self._map}\n')
+        #logging.info(f'Reward: {reward}\n'
+        #             f'Action: {action}\n'
+        #             f'Done: {done}\n'
+        #             f'Map:\n {self._map}\n')
 
         return new_state, reward, done, info
 

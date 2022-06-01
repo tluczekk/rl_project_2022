@@ -54,7 +54,10 @@ class Agent:
             self.memory.update_parameters()
         if self.time_step_nn == 0:
             if self.memory.experience_count > self.config.agent_experiences_per_sampling:
-                sample = self.memory.sample()
+                if self.config.agent_uniform_sampling:
+                    sample = self.memory.uni_sample()
+                else:
+                    sample = self.memory.sample()
                 self.learn(sample, self.config.agent_gamma)
         if self.time_step_mem == 0:
             self.memory.update_memory_sampling()
@@ -96,10 +99,10 @@ class Agent:
 
 
 class Agent_DQN(Agent):
-   def __init__(self, config: Config):
+   def __init__(self, config: Config, compute_weights=False):
         # Hyperparameters
         self.config = config
         # Getting parameters of environment
         # Each field can be either merchant, enemy or empty, except field of agent
         self._visibility_of_pirate = 2
-        super().__init__(config, len(Action), 123)
+        super().__init__(config, len(Action), 123, compute_weights)

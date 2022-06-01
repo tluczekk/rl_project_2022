@@ -9,12 +9,12 @@ import torch
 
 class Experiment:
 
-    def __init__(self, config: Config):
+    def __init__(self, config: Config, compute_weights = False):
         """
 
         """
         self.config = config
-        self.agent = Agent_DQN(config)
+        self.agent = Agent_DQN(config, compute_weights)
         self.environment = Environment(config)
 
 
@@ -42,7 +42,7 @@ class Experiment:
             scores.append(score)
             scores_window.append(score)
             eps = max(self.config.env_epsilon_end, self.config.env_epsilon_decay*eps)
-            if episode % 50 == 0:
+            if episode % 10 == 0:
                 scores_avgs.append(np.mean(scores_window))
         
         self.saveResults('model.pth')

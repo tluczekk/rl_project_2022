@@ -70,6 +70,7 @@ class Config:
         self.env_random_enemies = environment_section.getboolean('env_random_enemies')            # only nbr of enemies is random
         self.env_random_merchants = environment_section.getboolean('env_random_merchants')         # only nbr of merchants is random        ## environment
         self.env_move_enemies_merchants = environment_section.getboolean('env_move_enemies_merchants')  # indicatates if other ships shall move (or stay always at the same place)
+        self.env_action_success_prob = environment_section.getfloat('env_action_success_prob')
 
         # compute state_size basing on visibility of agent
         self.pirate_depth_of_view = environment_section.getint('env_pirate_depth_of_view')      # how far the pirate is able to see (defines statesize)
@@ -100,7 +101,7 @@ class Config:
         self.agent_update_mem_every = agent_section.getint('agent_update_mem_every')
         self.agent_update_mem_par_every = agent_section.getint('agent_update_mem_par_every')
         self.agent_experiences_per_sampling = math.ceil(self.agent_batch_size * self.agent_update_mem_every / self.agent_update_nn_every)
-
+        self.agent_uniform_sampling = agent_section.getboolean('agent_uniform_sampling')
 
         # Experiment section
         experiment_section = self.configuration['experiment']
