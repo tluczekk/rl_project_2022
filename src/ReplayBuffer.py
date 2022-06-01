@@ -8,7 +8,6 @@ import numpy as np
 from numpy.random import choice
 import torch
 import operator
-
 from Config import Config
 
 # Speeding up PyTorch calculations if Nvidia's CUDA is available
@@ -21,6 +20,7 @@ class ReplayBuffer:
         self.buffer_size = buffer_size
         self.batch_size = batch_size
         self.experiences_per_sampling = experiences_per_sampling
+        self.config = config
 
         # Parameters specific to Replay Buffer
         self.alpha = config.buf_alpha
@@ -85,7 +85,10 @@ class ReplayBuffer:
     def update_memory_sampling(self):
         self.current_batch = 0
         values = list(self.memory_data.values())
-        random_values = random.choices(self.memory_data,
+        if self.config.agent_uniform_sampling:
+            random_values = random.choices(self.memory_data, k = self.experiences_per_sampling)
+        else:
+            random_values = random.choices(self.memory_data,
                                         [data.probability for data in values],
                                         k = self.experiences_per_sampling)
         self.sampled_batches = [random_values[i: i + self.batch_size] for i in range(0,len(random_values), self.batch_size)]
@@ -150,6 +153,7 @@ class ReplayBuffer:
         experiences = []
         weights = []
         indices = []
+        
 
         for data in sampled_batch:
             experiences.append(self.memory.get(data.index))
@@ -170,6 +174,35 @@ class ReplayBuffer:
         ).float().to(device)
         dones = torch.from_numpy(
             np.vstack([e.done for e in experiences if e is not None]).astype(np.uint8)
+        ).float().to(device)
+
+        return (states, actions, rewards, next_states, dones, weights, indices)
+
+    def uni_sample(self):
+        sampled = random.choices(self.memory_data, k = self.experiences_per_sampling)
+        experiences = []
+        weights = []
+        indices = []
+
+        for data in sampled:
+            experiences.append(self.memory.get(data.index))
+            weights.append(data.weight)
+            indices.append(data.index)
+        #print(set([type(e.reward) for e in experiences if e is not None]))
+        states = torch.from_numpy(
+            np.vstack([e.state for e in experiences if e is not None and type(e.state) is np.ndarray])
+        ).float().to(device)
+        actions = torch.from_numpy(
+            np.vstack([e.action for e in experiences if e is not None and type(e.action) is np.int64])
+        ).long().to(device)
+        rewards = torch.from_numpy(
+            np.vstack([e.reward for e in experiences if e is not None and type(e.reward) is int])
+        ).float().to(device)
+        next_states = torch.from_numpy(
+            np.vstack([e.next_state for e in experiences if e is not None and type(e.next_state) is np.ndarray])
+        ).float().to(device)
+        dones = torch.from_numpy(
+            np.vstack([e.done for e in experiences if e is not None and type(e.done) is bool]).astype(np.uint8)
         ).float().to(device)
 
         return (states, actions, rewards, next_states, dones, weights, indices)

@@ -101,7 +101,7 @@ class Config:
         self.agent_update_mem_every = agent_section.getint('agent_update_mem_every')
         self.agent_update_mem_par_every = agent_section.getint('agent_update_mem_par_every')
         self.agent_experiences_per_sampling = math.ceil(self.agent_batch_size * self.agent_update_mem_every / self.agent_update_nn_every)
-
+        self.agent_uniform_sampling = agent_section.getboolean('agent_uniform_sampling')
 
         # Experiment section
         experiment_section = self.configuration['experiment']

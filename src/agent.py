@@ -54,7 +54,10 @@ class Agent:
             self.memory.update_parameters()
         if self.time_step_nn == 0:
             if self.memory.experience_count > self.config.agent_experiences_per_sampling:
-                sample = self.memory.sample()
+                if self.config.agent_uniform_sampling:
+                    sample = self.memory.uni_sample()
+                else:
+                    sample = self.memory.sample()
                 self.learn(sample, self.config.agent_gamma)
         if self.time_step_mem == 0:
             self.memory.update_memory_sampling()
