@@ -9,13 +9,16 @@ import torch
 
 class Experiment:
 
-    def __init__(self, config: Config, compute_weights = False):
+    def __init__(self, config: Config, compute_weights = False, env = None):
         """
 
         """
         self.config = config
         self.agent = Agent_DQN(config, compute_weights)
-        self.environment = Environment(config)
+        if env is None:
+            self.environment = Environment(config)
+        else:
+            self.environment = env
 
 
     def runExperiment(self) -> None:

@@ -119,9 +119,9 @@
 
 
 \section{Introduction}
-This project report summarizes the practical project of the course "Reinforcement Learning and Decision Making Under Uncertainty" at the University of Neuchatel in the spring semester of 2022, prepared by Jakub Tłuczek and Lukas Zoller.
+This project report summarizes the practical project of the course "Reinforcement Learning and Decision Making Under Uncertainty" at the University of Neuchâtel in the spring semester of 2022, prepared by Jakub Tłuczek and Lukas Zoller.
 
-The aim of the project was to implement a Reinforcement Learning algorithm on a frozen lake like environment\footnote{https://github.com/openai/gym/blob/master/gym/envs/toy\_text/frozen\_lake.py} with additional complications. Our environment models a sea with enemies our agent the pirate has to avoid and merchant ships the agent has to catch. Upon finding itself on the same field as enemy or merchant, agent obtains negative or positive reward respectively. Each step made by agent also cost it a small negative reward. Agent has limited field of view, in our work set to 5x5 grid.
+The aim of the project was to implement a Reinforcement Learning algorithm on a frozen lake like environment\footnote{https://github.com/openai/gym/blob/master/gym/envs/toy\_text/frozen\_lake.py} with additional complications. Our environment models a sea with enemies our agent (the pirate) has to avoid and merchant ships the agent has to catch. Upon finding itself on the same field as enemy or merchant, agent obtains negative or positive reward respectively. Each step made by agent also cost it a small negative reward. Agent has limited field of view, in our work set to 5x5 grid.
 
 Placement of vessels on the sea is random, therefore it might be the case that some initial states are easier to solve than others. Ultimate goal is to train an agent in a robust way, to take this randomness, as well as movement of vessels on the sea, into account.
 
@@ -136,7 +136,7 @@ Our environment represents a quadratic sea map where a pirate (the agent) wants 
 \clearpage
 
 \paragraph{Map}
-The followong shows a representation of our map with the following encoding: -1 = outside map, 0 = empty sea, 1 = pirate (our agent), 2 = merchant ship, 3 = pirate ship.
+The following shows a representation of our map with the following encoding: -1 = outside map, 0 = empty sea, 1 = pirate (our agent), 2 = merchant ship, 3 = pirate ship.
 
 \begin{verbatim}
  -1 -1 -1 -1 -1 -1 -1 -1 -1
@@ -169,15 +169,14 @@ Our environment can be changed quite easily with the setting of the following pa
 	\item number of enemies (fixed or random)
 	\item number of merchants (fixed or random)
 	\item if the enemies and merchants shall move or if they stay at the same spot over the whole episode.
-	\item our 
+	\item algorithm parameters 
 \end{itemize}
-These parameters can be easily changed with the config file and allow us for example to generate an environment which equals the frozen lake environment (non moving enemies, no merchants). With a simple environment like this we can more easily debug the code or set a baseline.
-
+These parameters can be easily changed with the config file and allow us to run experiments more easily. 
 
 \section{Main Content}
-While looking for the main method, an article \cite{crabe_2020} based on \cite{schaul_2016} brought an inspiration to use it in our project. 
+While looking for the main method, an article \cite{crabe_2020} based on \cite{schaul_2016} brought an inspiration to use Deep Q-Networks with Priority Experience Replay (later referred to as DQN with PER) in our project. 
 
-\subsection{Main method}
+\subsection{Main method - DQN with PER}
 
 Two features appealed to us in particular - first is the usage of neural networks, which addresses the robustness fears, second is the novel way how are the experiences sampled from the buffer - namely based on its sampling probability and weight:
 
@@ -197,27 +196,28 @@ Full algorithm, as presented in \cite{schaul_2016}:
     \label{fig:my_label}
 \end{figure}
 
-At each step, algorithm first observes the transition that happened and stores it in buffer with maximal priority. In some intervals, specified as parameters, experiences are first sampled from the buffer as minibatches. Afterwards, weights are computed beforehand, for them to be ready for backward pass. Loss is obtained after forward pass, and subsequently priority is updated to reflect it. Finally, network weights are updated after minibatch calculations finish. Afterwards, action is selected based on current policy and loop repeats. 
+At each step, algorithm first observes the transition that happened and stores it in buffer with maximal priority. In some intervals, specified as parameters, experiences are first sampled from the buffer as minibatches. Afterwards, sampling weights are computed beforehand, for them to be ready for backward pass. Loss is obtained after forward pass, and subsequently priority is updated to reflect it. Finally, network weights (not to confuse with sampling weights) are updated after minibatch calculations finish. Afterwards, action is selected based on current policy and loop repeats. 
 
 \subsection{Baseline methods}
 
 While looking for baseline methods, first idea was to compare Deep Q-Learning with its traditional counterpart, which uses Q-table to optimize its policy. Upon realizing that state space and action space would result in enormous Q-table ($4*5^{24}$), we decided to look for another method to compare this with. Briefly we considered using Fourier Basis approximation \cite{ziemke_2020}, however we ultimately didn't find it suitable for this project.\\
-Our choice was another off-policy algorithm, namely Soft Actor Critic \cite{haarnoja_2018}. Resulting state space would still be large, therfore we decided to choose implementation based on neural networks as well. OpenAI, who are the authors of popular benchmark framework for reinforcement learning Gym \url{gymlibrary.ml}, have also produced framework for deep reinforcement learning called SpinningUp \url{spinningup.openai.com}. Unfortunately, project seems to be abandoned since 2020, therefore in order to make it work with our environment, we had to modify extensively the source code for SAC, available at \footnote{https://github.com/openai/spinningup/tree/master/spinup/algos/pytorch/sac}. 
-Unfortunately, in case of our environment this method didn't converge, therefore we switched our focus to ablation tests - that is, how does the main method perform when:
+Our choice was another off-policy algorithm, namely Soft Actor Critic \cite{haarnoja_2018}. Resulting state space would still be large, therfore we decided to choose implementation based on neural networks as well. OpenAI, who are the authors of popular benchmark framework for reinforcement learning Gym \url{gymlibrary.ml}, have also produced framework for deep reinforcement learning called SpinningUp \url{spinningup.openai.com}. Unfortunately, project seems to be abandoned since 2020, therefore in order to make it work with our environment, we had to modify extensively the source code for SAC, available at \footnote{https://github.com/openai/spinningup/tree/master/spinup/algos/pytorch/sac}. \\
+Regrettably, in case of our environment this method didn't converge, therefore we switched our focus to ablation tests - that is, how does the main method perform when:
 
 \begin{itemize}
-    \item weights are calculated
-    \item weights are not calculated
+    \item sampling weights are calculated (full PER algorithm)
+    \item sampling weights are not calculated (all sampling weights are set to 1)
     \item experiences are sampled uniformly from the buffer
 \end{itemize}
 
 \subsection{Experiments}
+\label{sec:experiments}
 In order to test all scenarios, experiments have been conducted by running each scenario 5 times, scoring the returns in queue with fixed size N and each $\frac{N}{10}$ steps plotting the average return during past N episodes. We have chosen N to be 100.\\
 Results of training were then plotted, with each point representing mean return of the last N epochs. Lines represent the mean values at each point, while shaded areas in the same color denote standard deviation at that point.\\
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=13cm]{experiment.png}
+    \includegraphics[width=12cm]{experiment.png}
     \label{fig:my_label}
 \end{figure}
 \\
@@ -244,6 +244,43 @@ Finally, models in each scenario (which were saved to a state dictionary beforeh
 
 In each case it fails to reject null hypothesis, that true means are equal. Therefore, there is not enough statistical evidence to show, that any of this method is superior to another.
 
+\subsection{Lunar Lander experiments}
+
+In \cite{crabe_2020} author used the environment Lunar Lander \footnote{https://github.com/openai/gym/blob/master/gym/envs/box2d/lunar\_lander.py}. We also checked, how does the algorithm perform in this specific environment.\\
+Since we didn't have computational power and time to perform experiments as we did in the case of our environment, we ran each scenario once, and then compared both training progresses and evaluations, done 1000 times each on saved state dictionaries of models produced in each scenario.\\
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=12cm]{experiment_ll.png}
+    \label{fig:my_label}
+\end{figure}
+\\
+
+We observed that during training, in each scenario there were periods with much worse score than before. These drops were sudden, and promptly came back to the level one thought they might be converging on. In further work, it would be interesting to explain this phenomenon.\\
+
+We have also evaluated scores of training agent in similar fashion as in \hyperref[sec:experiments]{Experiments}.\\
+
+\begin{center}
+    \begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+        \hline
+        \multirow{2}{*}{Scenario} & \multirow{2}{*}{\mu} & \multirow{2}{*}{\sigma} & \multicolumn{2}{c|}{Weights} &
+        \multicolumn{2}{c|}{No weights} &
+        \multicolumn{2}{c|}{Uniform}\\
+        \cline{4-9}
+        & & & t & p & t & p & t & p\\
+        \hline
+        Weights & 0.67 & 147.43 & - & - & 8.53 & 5e-17 & 5.23 & 2e-7\\
+        \hline
+        No weights & 71.97 & 223.66 & 8.53 & 5e-17 & - & - & -11.73 & 7e-30\\
+        \hline
+        Uniform & -41.29 & 207.84 & 5.23 & 2e-7 & -11.73 & 7e-30 & - & -\\
+        \hline
+    \end{tabular}
+\end{center}
+
+In all cases p-values calculated in t-test allow us to reject null hypothesis. Therefore we can say that PER sampling is better in case of LunarLander environment. Bizarrely, we can also say that PER withour computing weights performs better, than when this weights, introduced to combat bias in backpropagation, are indeed calculated.
+
 \subsection{Own Contributions}
 Environment is created from scratch, and although it was inspired by OpenAI Gym, and made within the same convention, it doesn't inherit from it and doesn't require this particular framework. \\
 While working with code from \cite{crabe_2020}, several things had to be changed in order to make it work with our environment. Experiment scenarios also required few changes in the original code.
@@ -251,11 +288,12 @@ The same applies to OpenAI's SAC algorithm, which in order to work with modern f
 All our work is available in our repository at \url{https://github.com/lukaszoller/rl\_project\_2022}.
 
 \section{Conclusion}
-Deep Q-Learning with Prioritized Experience Replay is an interesting method, which is also great to learn more about deep reinforcement learning. It follows relatively simple concepts, and as shown in \cite{schaul_2016}, works very well in certain environments. \\
+Deep Q-Learning with Prioritized Experience Replay is an interesting method, which is also great to learn more about deep reinforcement learning. It follows relatively simple concepts, and as shown in \cite{schaul_2016}, works very well in certain environments - LunarLander might be such example. Having continuous observation and action space, DQN with PER fits very well - however experiments have shown that sampling weights, introduced to do away with the bias during propagation, actually perform worse when compared to PER with just sampling priorities and probabilities \\
 However, results of experiments have shown, that in case of our environment this particular method doesn't outperform neither DQN with uniform sampling, nor its counterpart with weights computation turned off. In all of this scenarios training progress was very similar, as were the evaluation scores, performed on final versions of Q-networks produced in each case.
 
 \paragraph{Further work} might include modification of the environment - how does this algorithm perform if visibility of the pirate is increased or decreased, how does it perform with modified reward system, etc. It is also worth exploring, how does full visibility of the map impact performance.\\
-As to the algorithm itself, it might be interesting to compare its performance on environments with continuous observation and action spaces, as oposed to discrete ones.
+As to the algorithm itself, it might be interesting to compare its performance on other environments, as we didn't have enough time to make the implementation universal to all OpenAI Gym environments.\\
+Another interesting aspect might be to investigate sudden drops in average return during training in LunarLander scenarios. Our hypothesis is, that having big negative reward once, algorithm assigns bigger priority to it, therefore it's repeated until it learns how to deal with this specific case - it does however need to be checked properly to confirm it.
 
 \newpage
 
