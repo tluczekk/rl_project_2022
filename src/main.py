@@ -21,7 +21,7 @@ def main(config_file_name):
     start = time.time()
 
     avgs = []
-    for i in range(3):
+    for i in range(5):
         scores, scores_avgs = experiment.runExperiment()
         avgs.append(scores_avgs)
         
